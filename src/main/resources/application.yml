@@ -4,7 +4,7 @@ spring:
       test:
         - "stdout"
   application:
-    name: prison-offender-events
+    name: hmpps-prison-offender-events
 
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"

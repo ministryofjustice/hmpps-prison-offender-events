@@ -1,1 +1,1 @@
-rootProject.name = "prison-offender-events"
+rootProject.name = "hmpps-prison-offender-events"
