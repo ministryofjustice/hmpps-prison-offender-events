@@ -1,10 +1,10 @@
 # Values here are the same across all environments
 generic-service:
-  nameOverride: prison-offender-events
+  nameOverride: hmpps-prison-offender-events
   productId: DPS060
 
   image:
-    repository: quay.io/hmpps/prison-offender-events
+    repository: ghcr.io/ministryofjustice/hmpps-prison-offender-events
     tag: app_version # override at deployment time
     port: 8080
 
@@ -32,11 +32,11 @@ generic-service:
   #     [name of environment variable as seen by app]: [key of kubernetes secret to load]
 
   namespace_secrets:
-    application-insights:
+    hmpps-prison-offender-events-application-insights:
       APPLICATIONINSIGHTS_CONNECTION_STRING: "APPLICATIONINSIGHTS_CONNECTION_STRING"
-    prison-offender-events:
-      OFFENDER_EVENTS_CLIENT_SECRET: "OFFENDER_EVENTS_CLIENT_SECRET"
-      OFFENDER_EVENTS_CLIENT_ID: "OFFENDER_EVENTS_CLIENT_ID"
+    hmpps-prison-offender-events-client-creds:
+      OFFENDER_EVENTS_CLIENT_ID: "API_CLIENT_ID"
+      OFFENDER_EVENTS_CLIENT_SECRET: "API_CLIENT_SECRET"
     offender-events-topic:
       HMPPS_SQS_TOPICS_PRISONEVENTTOPIC_ARN: "topic_arn"
     hmpps-domain-events-topic:
@@ -51,7 +51,7 @@ generic-service:
       - internal
 
 generic-prometheus-alerts:
-  targetApplication: prison-offender-events
+  targetApplication: hmpps-prison-offender-events
   sqsAlertsTotalMessagesThreshold: "0"
 
 cron:

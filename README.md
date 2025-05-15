@@ -1,9 +1,8 @@
 # prison offender events
-[![repo standards badge](https://img.shields.io/badge/endpoint.svg?&style=flat&logo=github&url=https%3A%2F%2Foperations-engineering-reports.cloud-platform.service.justice.gov.uk%2Fapi%2Fv1%2Fcompliant_public_repositories%2Fprison-offender-events)](https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/public-report/prison-offender-events "Link to report")
-[![CircleCI](https://circleci.com/gh/ministryofjustice/prison-offender-events/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/prison-offender-events)
-[![Docker Repository on Quay](https://img.shields.io/badge/quay.io-repository-2496ED.svg?logo=docker)](https://quay.io/repository/hmpps/prison-offender-events)
+[![repo standards badge](https://img.shields.io/badge/endpoint.svg?&style=flat&logo=github&url=https%3A%2F%2Foperations-engineering-reports.cloud-platform.service.justice.gov.uk%2Fapi%2Fv1%2Fcompliant_public_repositories%2Fhmpps-prison-offender-events)](https://operations-engineering-reports.cloud-platform.service.justice.gov.uk/public-report/hmpps-prison-offender-events "Link to report")
+[![Docker Repository on ghcr](https://img.shields.io/badge/ghcr.io-repository-2496ED.svg?logo=docker)](https://ghcr.io/ministryofjustice/hmpps-prison-offender-events)
 [![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://offender-events-dev.prison.service.justice.gov.uk/swagger-ui/index.html)
-[![Event docs](https://img.shields.io/badge/Event_docs-view-85EA2D.svg)](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/ministryofjustice/prison-offender-events/main/async-api.yml&readOnly)
+[![Event docs](https://img.shields.io/badge/Event_docs-view-85EA2D.svg)](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/ministryofjustice/hmpps-prison-offender-events/main/async-api.yml&readOnly)
 Publishes Events about prison offender changes to Pub / Sub Topics
 
 
@@ -79,6 +78,6 @@ docker-compose -f docker-compose-test.yml up
 
 The source set `testSmoke` contains the smoke tests.
 
-These tests are not intended to be run locally, but instead are run against a deployed application (as happens in the Circle build).
+These tests are not intended to be run locally, but instead are run against a deployed application (as happens in the Github actions build).
 
 For more information on the smoke tests see the project `dps-smoketest`.
