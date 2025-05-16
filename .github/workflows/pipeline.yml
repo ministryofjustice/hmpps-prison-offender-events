@@ -70,6 +70,7 @@ jobs:
   deploy_preprod:
     name: Deploy to the preprod environment
     needs:
+      - build
       - smoke_test
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
@@ -79,6 +80,7 @@ jobs:
   deploy_prod:
     name: Deploy to the prod environment
     needs:
+      - build
       - deploy_preprod
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
