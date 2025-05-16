@@ -30,13 +30,16 @@ jobs:
           java-version: '${{ inputs.java-version }}'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-disabled: true
       - name: Run smoke tests with gradle
         shell: bash
         run: |
           export JAVA_OPTS="${{ inputs.java-options }}"
           ${{ inputs.gradle-command }}
+        env:
+          SMOKETEST_CLIENT_CLIENT_ID: ${{ secrets.SMOKETEST_CLIENT_CLIENT_ID }}
+          SMOKETEST_CLIENT_CLIENT_SECRET: ${{ secrets.SMOKETEST_CLIENT_CLIENT_SECRET }}
+          SMOKETEST_ENDPOINT_URL: ${{ vars.SMOKETEST_ENDPOINT_URL }}
+          SMOKETEST_HMPPS_AUTH_ENDPOINT_URL: ${{ vars.SMOKETEST_HMPPS_AUTH_ENDPOINT_URL }}
       - name: Upload the artifacts
         if: always()
         uses: actions/upload-artifact@v4
