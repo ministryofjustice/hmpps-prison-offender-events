@@ -61,12 +61,16 @@ jobs:
     with:
       environment: 'dev'
       app_version: '${{ needs.build.outputs.app_version }}'
+  smoke_test:
+    name: Run the smoke tests
+    uses: ./.github/workflows/smoke_test.yml # LOCAL_VERSION
+    secrets: inherit
+    needs:
+      - deploy_dev
   deploy_preprod:
     name: Deploy to the preprod environment
     needs:
-      - build
-      - helm_lint
-      - deploy_dev
+      - smoke_test
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:
@@ -75,8 +79,6 @@ jobs:
   deploy_prod:
     name: Deploy to the prod environment
     needs:
-      - build
-      - helm_lint
       - deploy_preprod
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit

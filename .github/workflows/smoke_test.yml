@@ -1,0 +1,45 @@
+name: Runs the smoke tests in a hmpps github actions runner
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        type: string
+        required: false
+        default: '21'
+      java-options:
+        type: string
+        default: ''
+        required: false
+      gradle-command:
+        type: string
+        default: "./gradlew testSmoke -Dtestlogger.showStandardStreams=true"
+        required: false
+permissions:
+  contents: read
+jobs:
+  smoke-test:
+    name: Runs the smoke tests using gradle
+    runs-on: [self-hosted, hmpps-github-actions-runner]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '${{ inputs.java-version }}'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Run smoke tests with gradle
+        shell: bash
+        run: |
+          export JAVA_OPTS="${{ inputs.java-options }}"
+          ${{ inputs.gradle-command }}
+      - name: Upload the artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: upload test results
+          path: |
+            build/test-results
+            build/reports/tests
