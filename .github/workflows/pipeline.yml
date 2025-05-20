@@ -34,7 +34,7 @@ jobs:
       environment: ${{ matrix.environments }}
   gradle-verify:
     name: Run the tests
-    uses: ./.github/workflows/gradle_localstack_verify.yml # LOCAL_VERSION
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_localstack_verify.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:
       localstack-tag: "4"
