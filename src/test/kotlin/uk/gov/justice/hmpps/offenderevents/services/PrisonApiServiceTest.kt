@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientAutoConfiguration
+import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientWebSecurityAutoConfiguration
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
@@ -28,7 +29,7 @@ import uk.gov.justice.hmpps.offenderevents.services.wiremock.PrisonApiExtension.
 
 @ExtendWith(PrisonApiExtension::class, HMPPSAuthExtension::class)
 @ActiveProfiles(profiles = ["test"])
-@SpringBootTest(classes = [PrisonApiService::class, WebClientConfiguration::class, OffenderEventsProperties::class, SecurityAutoConfiguration::class, OAuth2ClientAutoConfiguration::class, WebClientAutoConfiguration::class])
+@SpringBootTest(classes = [PrisonApiService::class, WebClientConfiguration::class, OffenderEventsProperties::class, SecurityAutoConfiguration::class, OAuth2ClientAutoConfiguration::class, OAuth2ClientWebSecurityAutoConfiguration::class, WebClientAutoConfiguration::class])
 internal class PrisonApiServiceTest {
   @Autowired
   private lateinit var service: PrisonApiService
