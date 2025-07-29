@@ -61,7 +61,7 @@ dependencies {
 kotlin {
   jvmToolchain(21)
   compilerOptions {
-    freeCompilerArgs.addAll("-Xjvm-default=all", "-Xwhen-guards")
+    freeCompilerArgs.addAll("-Xjvm-default=all", "-Xwhen-guards", "-Xannotation-default-target=param-property")
   }
 }
 
