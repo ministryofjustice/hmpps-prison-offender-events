@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.6"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.7"
   kotlin("plugin.spring") version "2.2.10"
 }
 
@@ -36,7 +36,7 @@ dependencies {
   implementation("com.google.code.gson:gson:2.13.1")
   implementation("com.google.guava:guava:33.4.8-jre")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.5.0")
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -51,10 +51,10 @@ dependencies {
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.10.2")
   testImplementation("org.mockito:mockito-inline:5.2.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.31") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.32") {
     exclude(group = "io.swagger.core.v3")
   }
-  testImplementation("io.swagger.core.v3:swagger-core-jakarta:2.2.35")
+  testImplementation("io.swagger.core.v3:swagger-core-jakarta:2.2.36")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.52.0")
 }
 
