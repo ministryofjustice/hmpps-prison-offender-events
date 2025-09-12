@@ -25,7 +25,7 @@ dependencies {
   annotationProcessor("org.projectlombok:lombok:1.18.40")
   compileOnly("org.projectlombok:lombok:1.18.40")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.6.0-beta4")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.7.0-beta")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.10")
@@ -33,12 +33,12 @@ dependencies {
 
   implementation("org.apache.commons:commons-text:1.14.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
-  implementation("com.google.code.gson:gson:2.13.1")
+  implementation("com.google.code.gson:gson:2.13.2")
   implementation("com.google.guava:guava:33.4.8-jre")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.6.0-beta4")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.7.0-beta")
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
   testAnnotationProcessor("org.projectlombok:lombok:1.18.40")
   testCompileOnly("org.projectlombok:lombok:1.18.40")
