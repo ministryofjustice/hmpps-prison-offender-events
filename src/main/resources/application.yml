@@ -78,3 +78,7 @@ application:
   listener:
     totalDelayDuration: PT10M
     delayDuration: PT2M
+
+hmpps:
+  sqs:
+    defaultErrorVisibilityTimeout: 1, 10, 60, 600
