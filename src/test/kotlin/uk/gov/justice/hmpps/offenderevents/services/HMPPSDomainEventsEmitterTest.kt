@@ -1169,7 +1169,7 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
       with(upsertedPayload) {
         assertJsonPath("eventType", "prison-offender-events.visitor.restriction.upserted")
         assertJsonPath("occurredAt", "2022-12-04T10:00:00Z")
-        assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, java.time.temporal.ChronoUnit.SECONDS))
+        assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, SECONDS))
         assertJsonPath("personReference.identifiers[0].type", "PERSON")
         assertJsonPath("personReference.identifiers[0].value", "4")
         assertJsonPath("additionalInformation.visitorRestrictionId", "1")
@@ -1225,7 +1225,7 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
       with(deletedPayload) {
         assertJsonPath("eventType", "prison-offender-events.visitor.restriction.deleted")
         assertJsonPath("occurredAt", "2022-12-04T10:00:00Z")
-        assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, java.time.temporal.ChronoUnit.SECONDS))
+        assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, SECONDS))
         assertJsonPath("personReference.identifiers[0].type", "PERSON")
         assertJsonPath("personReference.identifiers[0].value", "4")
         assertJsonPath("additionalInformation.visitorRestrictionId", "1")
@@ -1283,7 +1283,7 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
 
     @Test
     fun `will use current time as publishedAt`() {
-      payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, java.time.temporal.ChronoUnit.SECONDS))
+      payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, SECONDS))
     }
 
     @Test
@@ -1368,7 +1368,7 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
 
     @Test
     fun `will use current time as publishedAt`() {
-      payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, java.time.temporal.ChronoUnit.SECONDS))
+      payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, SECONDS))
     }
 
     @Test
@@ -1465,7 +1465,7 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
 
     @Test
     fun `will use current time as publishedAt`() {
-      payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, java.time.temporal.ChronoUnit.SECONDS))
+      payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, SECONDS))
     }
 
     @Test
@@ -1560,7 +1560,7 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
     }
 
     @Test
-    fun `will describe the event as a prisoner activity update`() {
+    fun `will describe the event correctly`() {
       payload.assertJsonPath("description")
         .isEqualTo("A prisoner's sentence dates have been changed")
     }
@@ -1581,6 +1581,179 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
         "nomsNumber",
         "bookingId",
         "sentenceCalculationId",
+      )
+    }
+  }
+
+  @Nested
+  internal inner class Sentence {
+    private var payload: String? = null
+    private var telemetryAttributes: Map<String, String>? = null
+
+    @BeforeEach
+    fun setUp() {
+      emitter.convertAndSendWhenSignificant(
+        "OFFENDER_SENTENCES-INSERTED",
+        //language=JSON
+        """
+        {
+          "eventType": "OFFENDER_SENTENCES-INSERTED",
+          "eventDatetime": "2022-12-04T10:00:00",
+          "nomisEventType": "OFF_SENT-INSERTED",
+          "offenderIdDisplay": "A1234BC",
+          "bookingId": 43124234,
+          "auditModuleName": "MODULE",
+          "sentenceSeq": 2,
+          "caseId": 234567,
+          "sentenceLevel": "LEVEL",
+          "sentenceCategory": "CATEGORY"
+        } 
+        """.trimIndent(),
+      )
+      argumentCaptor<PublishRequest>().apply {
+        verify(hmppsEventSnsClient).publish(capture())
+        payload = firstValue.message()
+      }
+      argumentCaptor<Map<String, String>>().apply {
+        verify(telemetryClient, times(1)).trackEvent(
+          any(),
+          capture(),
+          isNull(),
+        )
+        telemetryAttributes = firstValue
+      }
+    }
+
+    @Test
+    fun `will use event datetime for occurred at time`() {
+      payload.assertJsonPath("occurredAt").isEqualTo("2022-12-04T10:00:00Z")
+    }
+
+    @Test
+    fun `will use current time as publishedAt`() {
+      payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, SECONDS))
+    }
+
+    @Test
+    fun `person reference will contain nomsId as NOMS identifier`() {
+      payload.assertJsonPathIsArray("personReference.identifiers").hasSize(1)
+      payload.assertJsonPath("personReference.identifiers[0].type").isEqualTo("NOMS")
+      payload.assertJsonPath("personReference.identifiers[0].value").isEqualTo("A1234BC")
+    }
+
+    @Test
+    fun `additional information will contain the correct fields`() {
+      payload.assertJsonPath("additionalInformation.bookingId").isEqualTo("43124234")
+      payload.assertJsonPath("additionalInformation.sentenceSequence").isEqualTo("2")
+    }
+
+    @Test
+    fun `will describe the event correctly`() {
+      payload.assertJsonPath("description")
+        .isEqualTo("A prisoner's sentence has changed")
+    }
+
+    @Test
+    fun `will add correct fields to telemetry event`() {
+      assertThat(telemetryAttributes).containsEntry("occurredAt", "2022-12-04T10:00:00Z")
+      assertThat(telemetryAttributes).containsEntry("nomsNumber", "A1234BC")
+      assertThat(telemetryAttributes).containsEntry("sentenceSequence", "2")
+    }
+
+    @Test
+    fun `will contain no other telemetry properties`() {
+      assertThat(telemetryAttributes).containsOnlyKeys(
+        "eventType",
+        "occurredAt",
+        "publishedAt",
+        "nomsNumber",
+        "bookingId",
+        "sentenceSequence",
+      )
+    }
+  }
+
+  @Nested
+  internal inner class SentenceTerms {
+    private var payload: String? = null
+    private var telemetryAttributes: Map<String, String>? = null
+
+    @BeforeEach
+    fun setUp() {
+      emitter.convertAndSendWhenSignificant(
+        "OFFENDER_SENTENCE_TERMS-INSERTED",
+        //language=JSON
+        """
+        {
+          "eventType": "OFFENDER_SENTENCE_TERMS-INSERTED",
+          "eventDatetime": "2022-12-04T10:00:00",
+          "nomisEventType": "OFF_SENT_TERM-INSERTED",
+          "offenderIdDisplay": "A1234BC",
+          "bookingId": 43124234,
+          "auditModuleName": "MODULE",
+          "sentenceSeq": 2,
+          "termSequence": 3
+        } 
+        """.trimIndent(),
+      )
+      argumentCaptor<PublishRequest>().apply {
+        verify(hmppsEventSnsClient).publish(capture())
+        payload = firstValue.message()
+      }
+      argumentCaptor<Map<String, String>>().apply {
+        verify(telemetryClient, times(1)).trackEvent(any(), capture(), isNull())
+        telemetryAttributes = firstValue
+      }
+    }
+
+    @Test
+    fun `will use event datetime for occurred at time`() {
+      payload.assertJsonPath("occurredAt").isEqualTo("2022-12-04T10:00:00Z")
+    }
+
+    @Test
+    fun `will use current time as publishedAt`() {
+      payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, SECONDS))
+    }
+
+    @Test
+    fun `person reference will contain nomsId as NOMS identifier`() {
+      payload.assertJsonPathIsArray("personReference.identifiers").hasSize(1)
+      payload.assertJsonPath("personReference.identifiers[0].type").isEqualTo("NOMS")
+      payload.assertJsonPath("personReference.identifiers[0].value").isEqualTo("A1234BC")
+    }
+
+    @Test
+    fun `additional information will contain the correct fields`() {
+      payload.assertJsonPath("additionalInformation.bookingId").isEqualTo("43124234")
+      payload.assertJsonPath("additionalInformation.sentenceSequence").isEqualTo("2")
+      payload.assertJsonPath("additionalInformation.termSequence").isEqualTo("3")
+    }
+
+    @Test
+    fun `will describe the event as a prisoner sentence terms update`() {
+      payload.assertJsonPath("description")
+        .isEqualTo("A prisoner's sentence terms have changed")
+    }
+
+    @Test
+    fun `will add correct fields to telemetry event`() {
+      assertThat(telemetryAttributes).containsEntry("occurredAt", "2022-12-04T10:00:00Z")
+      assertThat(telemetryAttributes).containsEntry("nomsNumber", "A1234BC")
+      assertThat(telemetryAttributes).containsEntry("sentenceSequence", "2")
+      assertThat(telemetryAttributes).containsEntry("termSequence", "3")
+    }
+
+    @Test
+    fun `will contain no other telemetry properties`() {
+      assertThat(telemetryAttributes).containsOnlyKeys(
+        "eventType",
+        "occurredAt",
+        "publishedAt",
+        "nomsNumber",
+        "bookingId",
+        "sentenceSequence",
+        "termSequence",
       )
     }
   }
@@ -1950,6 +2123,98 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
       )
 
       assertThat(telemetryAttributes).doesNotContainKey("scheduledEndTime")
+    }
+  }
+
+  @Nested
+  internal inner class FinePaymentChanged {
+    private var payload: String? = null
+    private var telemetryAttributes: Map<String, String>? = null
+
+    @BeforeEach
+    fun setUp() {
+      emitter.convertAndSendWhenSignificant(
+        "OFFENDER_FINE_PAYMENTS-INSERTED",
+        //language=JSON
+        """
+        {
+          "eventType": "OFFENDER_FINE_PAYMENTS-INSERTED",
+          "eventDatetime": "2022-12-04T10:00:00",
+          "nomisEventType": "OFFENDER_FINE_PAYMENTS-INSERTED",
+          "offenderIdDisplay": "A1234BC",
+          "bookingId": 43124234,
+          "paymentSequence": 2,
+          "paymentDate": "2025-10-31T12:34",
+          "paymentAmount": 23.45,
+          "comment": "comment",
+          "weekEndDays": 1,
+          "staffId": 1234567,
+          "paymentStatus": "STATUS",
+          "auditModuleName": "AUDIT"
+        } 
+        """.trimIndent(),
+      )
+      argumentCaptor<PublishRequest>().apply {
+        verify(hmppsEventSnsClient).publish(capture())
+        payload = firstValue.message()
+      }
+      argumentCaptor<Map<String, String>>().apply {
+        verify(telemetryClient, times(1)).trackEvent(
+          any(),
+          capture(),
+          isNull(),
+        )
+        telemetryAttributes = firstValue
+      }
+    }
+
+    @Test
+    fun `will use event datetime for occurred at time`() {
+      payload.assertJsonPath("occurredAt").isEqualTo("2022-12-04T10:00:00Z")
+    }
+
+    @Test
+    fun `will use current time as publishedAt`() {
+      payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, SECONDS))
+    }
+
+    @Test
+    fun `person reference will contain nomsId as NOMS identifier`() {
+      payload.assertJsonPathIsArray("personReference.identifiers").hasSize(1)
+      payload.assertJsonPath("personReference.identifiers[0].type").isEqualTo("NOMS")
+      payload.assertJsonPath("personReference.identifiers[0].value").isEqualTo("A1234BC")
+    }
+
+    @Test
+    fun `additional information will contain the correct fields`() {
+      payload.assertJsonPath("additionalInformation.bookingId").isEqualTo("43124234")
+      payload.assertJsonPath("additionalInformation.paymentSequence").isEqualTo("2")
+    }
+
+    @Test
+    fun `will describe the event correctly`() {
+      payload.assertJsonPath("description")
+        .isEqualTo("A prisoner's fine payment has changed")
+    }
+
+    @Test
+    fun `will add correct fields to telemetry event`() {
+      assertThat(telemetryAttributes).containsEntry("occurredAt", "2022-12-04T10:00:00Z")
+      assertThat(telemetryAttributes).containsEntry("nomsNumber", "A1234BC")
+      assertThat(telemetryAttributes).containsEntry("bookingId", "43124234")
+      assertThat(telemetryAttributes).containsEntry("paymentSequence", "2")
+    }
+
+    @Test
+    fun `will contain no other telemetry properties`() {
+      assertThat(telemetryAttributes).containsOnlyKeys(
+        "eventType",
+        "occurredAt",
+        "publishedAt",
+        "nomsNumber",
+        "bookingId",
+        "paymentSequence",
+      )
     }
   }
 
