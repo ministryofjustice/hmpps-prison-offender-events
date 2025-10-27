@@ -83,7 +83,7 @@ class NonAssociationDetailsOffenderEvent(
   val effectiveDate: LocalDate?,
   val expiryDate: LocalDate?,
   val authorisedBy: String?,
-  val comment: String?,
+  val comment: String?, // TODO: now removed from hmpps-prisoner-events
 ) : OffenderEvent(
   eventDatetime = eventDatetime,
   offenderIdDisplay = offenderIdDisplay,
@@ -294,6 +294,33 @@ class SentenceDatesChangedEvent(
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+class SentenceChangedEvent(
+  eventDatetime: LocalDateTime,
+  override val offenderIdDisplay: String,
+  val bookingId: Long,
+  val sentenceSeq: Int,
+) : OffenderEvent(
+  eventDatetime = eventDatetime,
+  offenderIdDisplay = offenderIdDisplay,
+) {
+  companion object
+}
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class SentenceTermsChangedEvent(
+  eventDatetime: LocalDateTime,
+  override val offenderIdDisplay: String,
+  val bookingId: Long,
+  val sentenceSeq: Int,
+  val termSequence: Int,
+) : OffenderEvent(
+  eventDatetime = eventDatetime,
+  offenderIdDisplay = offenderIdDisplay,
+) {
+  companion object
+}
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 abstract class OffenderContactEvent(
   eventDatetime: LocalDateTime,
   override val offenderIdDisplay: String,
@@ -381,6 +408,31 @@ class AppointmentChangedEvent(
 ) : OffenderEvent(
   eventDatetime = eventDatetime,
   offenderIdDisplay = null,
+) {
+  companion object
+}
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class FinePaymentEvent(
+  eventDatetime: LocalDateTime,
+  offenderIdDisplay: String,
+  val bookingId: Long,
+  val paymentSequence: Int,
+) : OffenderEvent(
+  eventDatetime = eventDatetime,
+  offenderIdDisplay = offenderIdDisplay,
+) {
+  companion object
+}
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class BookingEvent(
+  eventDatetime: LocalDateTime,
+  offenderIdDisplay: String,
+  val bookingId: Long,
+) : OffenderEvent(
+  eventDatetime = eventDatetime,
+  offenderIdDisplay = offenderIdDisplay,
 ) {
   companion object
 }
