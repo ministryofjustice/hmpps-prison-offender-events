@@ -424,3 +424,15 @@ class FinePaymentEvent(
 ) {
   companion object
 }
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class BookingEvent(
+  eventDatetime: LocalDateTime,
+  offenderIdDisplay: String,
+  val bookingId: Long,
+) : OffenderEvent(
+  eventDatetime = eventDatetime,
+  offenderIdDisplay = offenderIdDisplay,
+) {
+  companion object
+}

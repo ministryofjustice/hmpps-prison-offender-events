@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.hmpps.offenderevents.config.OffenderEventsProperties
 import uk.gov.justice.hmpps.offenderevents.model.AppointmentChangedEvent
+import uk.gov.justice.hmpps.offenderevents.model.BookingEvent
 import uk.gov.justice.hmpps.offenderevents.model.CaseNoteOffenderEvent
 import uk.gov.justice.hmpps.offenderevents.model.CellMoveOffenderEvent
 import uk.gov.justice.hmpps.offenderevents.model.FinePaymentEvent
@@ -92,6 +93,7 @@ class HMPPSDomainEventsEmitter(
       "OFFENDER_SENTENCE_TERMS-INSERTED", "OFFENDER_SENTENCE_TERMS-UPDATED", "OFFENDER_SENTENCE_TERMS-DELETED" -> SentenceTermsChangedEvent.toDomainEvents(message.fromJson())
       "APPOINTMENT_CHANGED" -> AppointmentChangedEvent.toDomainEvents(message.fromJson())
       "OFFENDER_FINE_PAYMENTS-INSERTED", "OFFENDER_FINE_PAYMENTS-UPDATED", "OFFENDER_FINE_PAYMENTS-DELETED" -> FinePaymentEvent.toDomainEvents(message.fromJson())
+      "OFFENDER_FIXED_TERM_RECALLS-INSERTED", "OFFENDER_FIXED_TERM_RECALLS-UPDATED", "OFFENDER_FIXED_TERM_RECALLS-DELETED" -> BookingEvent.toFixedTermRecallEvents(message.fromJson())
       else -> emptyList()
     }.also {
       sendEvents(it)
@@ -385,7 +387,7 @@ class HMPPSDomainEventsEmitter(
   private fun SentenceChangedEvent.Companion.toDomainEvents(event: SentenceChangedEvent): List<HmppsDomainEvent> = event.toDomainEvent().toListOrEmptyWhenNull()
 
   private fun SentenceChangedEvent.toDomainEvent() = HmppsDomainEvent(
-    eventType = "prison-offender-events.prisoner.sentence-changed",
+    eventType = "prison-offender-events.prisoner.sentence.changed",
     description = "A prisoner's sentence has changed",
     occurredAt = this.toOccurredAt(),
     publishedAt = OffsetDateTime.now().toString(),
@@ -398,7 +400,7 @@ class HMPPSDomainEventsEmitter(
   private fun SentenceTermsChangedEvent.Companion.toDomainEvents(event: SentenceTermsChangedEvent): List<HmppsDomainEvent> = event.toDomainEvent().toListOrEmptyWhenNull()
 
   private fun SentenceTermsChangedEvent.toDomainEvent() = HmppsDomainEvent(
-    eventType = "prison-offender-events.prisoner.sentence-terms-changed",
+    eventType = "prison-offender-events.prisoner.sentence-term.changed",
     description = "A prisoner's sentence terms have changed",
     occurredAt = this.toOccurredAt(),
     publishedAt = OffsetDateTime.now().toString(),
@@ -546,7 +548,7 @@ class HMPPSDomainEventsEmitter(
   private fun FinePaymentEvent.Companion.toDomainEvents(event: FinePaymentEvent): List<HmppsDomainEvent> = event.toDomainEvent().toListOrEmptyWhenNull()
 
   private fun FinePaymentEvent.toDomainEvent() = HmppsDomainEvent(
-    eventType = "prison-offender-events.prisoner.fine-payments-changed",
+    eventType = "prison-offender-events.prisoner.fine-payment.changed",
     description = "A prisoner's fine payment has changed",
     occurredAt = this.toOccurredAt(),
     publishedAt = OffsetDateTime.now().toString(),
@@ -554,6 +556,17 @@ class HMPPSDomainEventsEmitter(
   )
     .withAdditionalInformation("bookingId", this.bookingId)
     .withAdditionalInformation("paymentSequence", this.paymentSequence)
+
+  private fun BookingEvent.Companion.toFixedTermRecallEvents(event: BookingEvent): List<HmppsDomainEvent> = event.toFixedTermRecallEvents().toListOrEmptyWhenNull()
+
+  private fun BookingEvent.toFixedTermRecallEvents() = HmppsDomainEvent(
+    eventType = "prison-offender-events.prisoner.fixed-term-recall.changed",
+    description = "A prisoner's fixed term recall has changed",
+    occurredAt = this.toOccurredAt(),
+    publishedAt = OffsetDateTime.now().toString(),
+    personReference = PersonReference(this.offenderIdDisplay!!),
+  )
+    .withAdditionalInformation("bookingId", this.bookingId)
 }
 private fun HmppsDomainEvent.toList() = listOf(this)
 private fun HmppsDomainEvent?.toListOrEmptyWhenNull() = this?.toList() ?: emptyList()
