@@ -36,6 +36,10 @@ components:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.contact-removed.yaml
     prison-offender-events.prisoner.contact-unapproved:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.contact-unapproved.yaml
+    prison-offender-events.prisoner.fine-payment.changed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.fine-payment.changed.yaml
+    prison-offender-events.prisoner.fixed-term-recall.changed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.fixed-term-recall.changed.yaml
     prison-offender-events.prisoner.imprisonment-status-changed:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.imprisonment-status-changed.yaml
     prison-offender-events.prisoner.merged:
@@ -54,6 +58,10 @@ components:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.restriction.changed.yaml
     prison-offender-events.prisoner.sentence-dates-changed:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.sentence-dates-changed.yaml
+    prison-offender-events.prisoner.sentence.changed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.sentence.changed.yaml
+    prison-offender-events.prisoner.sentence-term.changed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.sentence-term.changed.yaml
     prison-offender-events.prisoner.video-appointment.cancelled:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.video-appointment.cancelled.yaml
     prison-offender-events.visitor.restriction.deleted:
