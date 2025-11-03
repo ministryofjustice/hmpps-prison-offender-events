@@ -391,10 +391,6 @@ class HMPPSDomainEventsEmitter(
     // this filter limits the event to 'real' sentence changes, e.g. which affect the release date calculation
   }
     ?.let {
-//    if (
-//    caseId != null && sentenceLevel == "IND" && sentenceCategory != "LICENCE"
-//    // this filter limits the event to 'real' sentence changes, e.g. which affect the release date calculation
-//  ) {
       HmppsDomainEvent(
         eventType = "prison-offender-events.prisoner.sentence.changed",
         description = "A prisoner's sentence has changed",
