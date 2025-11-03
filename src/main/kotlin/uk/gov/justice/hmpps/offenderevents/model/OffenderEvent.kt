@@ -299,6 +299,9 @@ class SentenceChangedEvent(
   override val offenderIdDisplay: String,
   val bookingId: Long,
   val sentenceSeq: Int,
+  val caseId: Long? = null,
+  val sentenceLevel: String? = null,
+  val sentenceCategory: String? = null,
 ) : OffenderEvent(
   eventDatetime = eventDatetime,
   offenderIdDisplay = offenderIdDisplay,
