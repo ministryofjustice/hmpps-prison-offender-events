@@ -1590,12 +1590,15 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
     private var payload: String? = null
     private var telemetryAttributes: Map<String, String>? = null
 
-    @BeforeEach
-    fun setUp() {
-      emitter.convertAndSendWhenSignificant(
-        "OFFENDER_SENTENCES-INSERTED",
-        //language=JSON
-        """
+    @Nested
+    internal inner class HappyPath {
+
+      @BeforeEach
+      fun setUp() {
+        emitter.convertAndSendWhenSignificant(
+          "OFFENDER_SENTENCES-INSERTED",
+          //language=JSON
+          """
         {
           "eventType": "OFFENDER_SENTENCES-INSERTED",
           "eventDatetime": "2022-12-04T10:00:00",
@@ -1605,71 +1608,144 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
           "auditModuleName": "MODULE",
           "sentenceSeq": 2,
           "caseId": 234567,
-          "sentenceLevel": "LEVEL",
+          "sentenceLevel": "IND",
           "sentenceCategory": "CATEGORY"
         } 
-        """.trimIndent(),
-      )
-      argumentCaptor<PublishRequest>().apply {
-        verify(hmppsEventSnsClient).publish(capture())
-        payload = firstValue.message()
-      }
-      argumentCaptor<Map<String, String>>().apply {
-        verify(telemetryClient, times(1)).trackEvent(
-          any(),
-          capture(),
-          isNull(),
+          """.trimIndent(),
         )
-        telemetryAttributes = firstValue
+        argumentCaptor<PublishRequest>().apply {
+          verify(hmppsEventSnsClient).publish(capture())
+          payload = firstValue.message()
+        }
+        argumentCaptor<Map<String, String>>().apply {
+          verify(telemetryClient, times(1)).trackEvent(
+            any(),
+            capture(),
+            isNull(),
+          )
+          telemetryAttributes = firstValue
+        }
+      }
+
+      @Test
+      fun `will use event datetime for occurred at time`() {
+        payload.assertJsonPath("occurredAt").isEqualTo("2022-12-04T10:00:00Z")
+      }
+
+      @Test
+      fun `will use current time as publishedAt`() {
+        payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, SECONDS))
+      }
+
+      @Test
+      fun `person reference will contain nomsId as NOMS identifier`() {
+        payload.assertJsonPathIsArray("personReference.identifiers").hasSize(1)
+        payload.assertJsonPath("personReference.identifiers[0].type").isEqualTo("NOMS")
+        payload.assertJsonPath("personReference.identifiers[0].value").isEqualTo("A1234BC")
+      }
+
+      @Test
+      fun `additional information will contain the correct fields`() {
+        payload.assertJsonPath("additionalInformation.bookingId").isEqualTo("43124234")
+        payload.assertJsonPath("additionalInformation.sentenceSequence").isEqualTo("2")
+      }
+
+      @Test
+      fun `will describe the event correctly`() {
+        payload.assertJsonPath("eventType").isEqualTo("prison-offender-events.prisoner.sentence.changed")
+        payload.assertJsonPath("description").isEqualTo("A prisoner's sentence has changed")
+      }
+
+      @Test
+      fun `will add correct fields to telemetry event`() {
+        assertThat(telemetryAttributes).containsEntry("occurredAt", "2022-12-04T10:00:00Z")
+        assertThat(telemetryAttributes).containsEntry("nomsNumber", "A1234BC")
+        assertThat(telemetryAttributes).containsEntry("sentenceSequence", "2")
+      }
+
+      @Test
+      fun `will contain no other telemetry properties`() {
+        assertThat(telemetryAttributes).containsOnlyKeys(
+          "eventType",
+          "occurredAt",
+          "publishedAt",
+          "nomsNumber",
+          "bookingId",
+          "sentenceSequence",
+        )
       }
     }
 
-    @Test
-    fun `will use event datetime for occurred at time`() {
-      payload.assertJsonPath("occurredAt").isEqualTo("2022-12-04T10:00:00Z")
-    }
+    @Nested
+    internal inner class Filter {
 
-    @Test
-    fun `will use current time as publishedAt`() {
-      payload.assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, SECONDS))
-    }
+      @Test
+      fun `no caseId`() {
+        emitter.convertAndSendWhenSignificant(
+          "OFFENDER_SENTENCES-INSERTED",
+          //language=JSON
+          """
+        {
+          "eventType": "OFFENDER_SENTENCES-INSERTED",
+          "eventDatetime": "2022-12-04T10:00:00",
+          "nomisEventType": "OFF_SENT-INSERTED",
+          "offenderIdDisplay": "A1234BC",
+          "bookingId": 43124234,
+          "auditModuleName": "MODULE",
+          "sentenceSeq": 2,
+          "sentenceLevel": "IND",
+          "sentenceCategory": "CATEGORY"
+        } 
+          """.trimIndent(),
+        )
+        verifyNoInteractions(hmppsEventSnsClient)
+      }
 
-    @Test
-    fun `person reference will contain nomsId as NOMS identifier`() {
-      payload.assertJsonPathIsArray("personReference.identifiers").hasSize(1)
-      payload.assertJsonPath("personReference.identifiers[0].type").isEqualTo("NOMS")
-      payload.assertJsonPath("personReference.identifiers[0].value").isEqualTo("A1234BC")
-    }
+      @Test
+      fun `licence category`() {
+        emitter.convertAndSendWhenSignificant(
+          "OFFENDER_SENTENCES-INSERTED",
+          //language=JSON
+          """
+        {
+          "eventType": "OFFENDER_SENTENCES-INSERTED",
+          "eventDatetime": "2022-12-04T10:00:00",
+          "nomisEventType": "OFF_SENT-INSERTED",
+          "offenderIdDisplay": "A1234BC",
+          "bookingId": 43124234,
+          "auditModuleName": "MODULE",
+          "caseId": 234567,
+          "sentenceSeq": 2,
+          "sentenceLevel": "IND",
+          "sentenceCategory": "LICENCE"
+        } 
+          """.trimIndent(),
+        )
+        verifyNoInteractions(hmppsEventSnsClient)
+      }
 
-    @Test
-    fun `additional information will contain the correct fields`() {
-      payload.assertJsonPath("additionalInformation.bookingId").isEqualTo("43124234")
-      payload.assertJsonPath("additionalInformation.sentenceSequence").isEqualTo("2")
-    }
-
-    @Test
-    fun `will describe the event correctly`() {
-      payload.assertJsonPath("eventType").isEqualTo("prison-offender-events.prisoner.sentence.changed")
-      payload.assertJsonPath("description").isEqualTo("A prisoner's sentence has changed")
-    }
-
-    @Test
-    fun `will add correct fields to telemetry event`() {
-      assertThat(telemetryAttributes).containsEntry("occurredAt", "2022-12-04T10:00:00Z")
-      assertThat(telemetryAttributes).containsEntry("nomsNumber", "A1234BC")
-      assertThat(telemetryAttributes).containsEntry("sentenceSequence", "2")
-    }
-
-    @Test
-    fun `will contain no other telemetry properties`() {
-      assertThat(telemetryAttributes).containsOnlyKeys(
-        "eventType",
-        "occurredAt",
-        "publishedAt",
-        "nomsNumber",
-        "bookingId",
-        "sentenceSequence",
-      )
+      @Test
+      fun `AGG level`() {
+        emitter.convertAndSendWhenSignificant(
+          "OFFENDER_SENTENCES-INSERTED",
+          //language=JSON
+          """
+        {
+          "eventType": "OFFENDER_SENTENCES-INSERTED",
+          "eventDatetime": "2022-12-04T10:00:00",
+          "nomisEventType": "OFF_SENT-INSERTED",
+          "offenderIdDisplay": "A1234BC",
+          "bookingId": 43124234,
+          "auditModuleName": "MODULE",
+          "caseId": 234567,
+          "sentenceSeq": 2,
+          "sentenceLevel": "AGG",
+          "sentenceCategory": "CATEGORY"
+        } 
+          """.trimIndent(),
+        )
+        verifyNoInteractions(hmppsEventSnsClient)
+      }
     }
   }
 

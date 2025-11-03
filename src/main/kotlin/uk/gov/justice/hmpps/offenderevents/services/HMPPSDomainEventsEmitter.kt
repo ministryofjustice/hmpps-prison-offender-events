@@ -386,16 +386,22 @@ class HMPPSDomainEventsEmitter(
 
   private fun SentenceChangedEvent.Companion.toDomainEvents(event: SentenceChangedEvent): List<HmppsDomainEvent> = event.toDomainEvent().toListOrEmptyWhenNull()
 
-  private fun SentenceChangedEvent.toDomainEvent() = HmppsDomainEvent(
-    eventType = "prison-offender-events.prisoner.sentence.changed",
-    description = "A prisoner's sentence has changed",
-    occurredAt = this.toOccurredAt(),
-    publishedAt = OffsetDateTime.now().toString(),
-    personReference = PersonReference(this.offenderIdDisplay),
-  )
-    .withAdditionalInformation("nomsNumber", this.offenderIdDisplay)
-    .withAdditionalInformation("bookingId", this.bookingId)
-    .withAdditionalInformation("sentenceSequence", this.sentenceSeq)
+  private fun SentenceChangedEvent.toDomainEvent() = takeIf {
+    caseId != null && sentenceLevel == "IND" && sentenceCategory != "LICENCE"
+    // this filter limits the event to 'real' sentence changes, e.g. which affect the release date calculation
+  }
+    ?.let {
+      HmppsDomainEvent(
+        eventType = "prison-offender-events.prisoner.sentence.changed",
+        description = "A prisoner's sentence has changed",
+        occurredAt = this.toOccurredAt(),
+        publishedAt = OffsetDateTime.now().toString(),
+        personReference = PersonReference(this.offenderIdDisplay),
+      )
+        .withAdditionalInformation("nomsNumber", this.offenderIdDisplay)
+        .withAdditionalInformation("bookingId", this.bookingId)
+        .withAdditionalInformation("sentenceSequence", this.sentenceSeq)
+    }
 
   private fun SentenceTermsChangedEvent.Companion.toDomainEvents(event: SentenceTermsChangedEvent): List<HmppsDomainEvent> = event.toDomainEvent().toListOrEmptyWhenNull()
 
