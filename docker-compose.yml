@@ -1,4 +1,3 @@
-version: "3"
 services:
   prison-offender-events:
     image: ghcr.io/ministryofjustice/hmpps-prison-offender-events:latest
