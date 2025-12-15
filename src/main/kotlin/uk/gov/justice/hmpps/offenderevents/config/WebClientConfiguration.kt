@@ -16,6 +16,8 @@ class WebClientConfiguration(
   @Value("\${api.health-timeout:2s}") val healthTimeout: Duration,
   @Value("\${api.timeout:20s}") val timeout: Duration,
 ) {
+  @Bean
+  fun webClientBuilder(): WebClient.Builder = WebClient.builder()
 
   @Bean
   fun prisonApiWebClient(
