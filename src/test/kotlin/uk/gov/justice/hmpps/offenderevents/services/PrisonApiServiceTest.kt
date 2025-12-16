@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.justice.hmpps.offenderevents.services.CurrentLocation.BEING_TRANSFERRED
 import uk.gov.justice.hmpps.offenderevents.services.CurrentLocation.IN_PRISON
@@ -25,7 +24,6 @@ import uk.gov.justice.hmpps.offenderevents.services.wiremock.PrisonApiExtension.
 @ExtendWith(PrisonApiExtension::class, HMPPSAuthExtension::class)
 @ActiveProfiles(profiles = ["test"])
 @SpringBootTest
-@AutoConfigureWebClient
 internal class PrisonApiServiceTest {
   @Autowired
   private lateinit var service: PrisonApiService
