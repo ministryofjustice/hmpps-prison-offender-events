@@ -71,7 +71,7 @@ aws --endpoint-url=http://localhost:4566 sqs receive-message --queue-url http://
 The integration tests depend on localstack to be running to access the topics and test queues, this can be started with docker-compose
 
 ```bash
-docker-compose -f docker-compose-test.yml up
+docker compose -f docker-compose-test.yml up
 ```
 
 #### Smoke Tests
