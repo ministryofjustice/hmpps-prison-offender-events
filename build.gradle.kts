@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.0-beta-3"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.0-beta-4"
   kotlin("plugin.spring") version "2.3.0"
 }
 
@@ -27,7 +27,7 @@ dependencies {
   annotationProcessor("org.projectlombok:lombok:1.18.42")
   compileOnly("org.projectlombok:lombok:1.18.42")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.0.0-beta-2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.0.0-beta-3")
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -45,7 +45,7 @@ dependencies {
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.0.0-beta-2")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.0.0-beta-3")
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
   testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
   testCompileOnly("org.projectlombok:lombok:1.18.42")
