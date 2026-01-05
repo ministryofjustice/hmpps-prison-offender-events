@@ -8,8 +8,6 @@ spring:
   http:
     codecs:
       max-in-memory-size: 10MB
-    converters:
-      preferred-json-mapper: jackson2
 
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
