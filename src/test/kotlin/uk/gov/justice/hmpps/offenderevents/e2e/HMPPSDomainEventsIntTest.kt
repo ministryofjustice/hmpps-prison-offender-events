@@ -1,7 +1,5 @@
 package uk.gov.justice.hmpps.offenderevents.e2e
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.within
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
@@ -20,6 +18,8 @@ import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.hmpps.offenderevents.helpers.assertDoesNotExist
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPath
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPathDateTimeIsCloseTo
@@ -59,7 +59,7 @@ class HMPPSDomainEventsIntTest : QueueListenerIntegrationTest() {
 
   private fun toSQSMessage(message: String): SQSMessage = try {
     objectMapper.readValue(message, SQSMessage::class.java)
-  } catch (e: JsonProcessingException) {
+  } catch (e: JacksonException) {
     throw RuntimeException(String.format("Message %s is not parseable", message))
   }
 
