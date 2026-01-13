@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import uk.gov.justice.hmpps.offenderevents.helpers.assertDoesNotExist
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPath
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPathDateTimeIsCloseTo
 import uk.gov.justice.hmpps.offenderevents.resource.QueueListenerIntegrationTest
@@ -431,6 +432,7 @@ class HMPPSDomainEventsIntTest : QueueListenerIntegrationTest() {
             "previousOffenderIdDisplay":"A9999CA",
             "previousOffenderId":"5260560",
             "bookingStartDateTime":"2024-07-08T14:28:10",
+            "bookingEndDateTime":"2025-10-09T14:28:10",
             "lastAdmissionDate":"2024-07-08"
           }
                 """
@@ -448,12 +450,58 @@ class HMPPSDomainEventsIntTest : QueueListenerIntegrationTest() {
 
     @Nested
     internal inner class WhenMovedBetweenPrisoners {
-      @BeforeEach
-      fun setUp() {
-        sendToTopic(
-          "OFFENDER_BOOKING-REASSIGNED",
-          // language=JSON
-          """
+      @Nested
+      internal inner class WhenBookingEndDatePresent {
+        @BeforeEach
+        fun setUp() {
+          sendToTopic(
+            "OFFENDER_BOOKING-REASSIGNED",
+            // language=JSON
+            """
+          {
+            "eventType":"OFFENDER_BOOKING-REASSIGNED",
+            "bookingId":"2936648",
+            "eventDatetime":"2024-07-08T14:28:10.0000000Z",
+            "offenderIdDisplay":"A9999CA",
+            "nomisEventType":"OFF_BKB_UPD",
+            "offenderId":"2620073",
+            "previousOffenderIdDisplay":"A1111CL",
+            "previousOffenderId":"5260560",
+            "bookingStartDateTime":"2024-07-08T14:28:10",
+            "bookingEndDateTime":"2025-10-09T14:28:10",
+            "lastAdmissionDate":"2024-07-08"
+          }
+                """
+              .trimIndent(),
+          )
+        }
+
+        @Test
+        fun `will publish a domain event`() {
+          await().until { getNumberOfMessagesCurrentlyOnHMPPSEventTestQueue() == 1 }
+          val domainEvent = geMessagesCurrentlyOnHMPPSTestQueue().first()
+
+          with(domainEvent) {
+            assertJsonPath("eventType", "prison-offender-events.prisoner.booking.moved")
+            assertJsonPath("additionalInformation.movedToNomsNumber").isEqualTo("A9999CA")
+            assertJsonPath("additionalInformation.movedFromNomsNumber").isEqualTo("A1111CL")
+            assertJsonPath("personReference.identifiers[0].value").isEqualTo("A9999CA")
+            assertJsonPath("personReference.identifiers[0].type").isEqualTo("NOMS")
+            assertJsonPath("additionalInformation.bookingId").asString().isEqualTo("2936648")
+            assertJsonPath("additionalInformation.bookingStartDateTime").isEqualTo("2024-07-08T14:28:10")
+            assertJsonPath("additionalInformation.bookingEndDateTime").isEqualTo("2025-10-09T14:28:10")
+          }
+        }
+      }
+
+      @Nested
+      internal inner class WhenBookingEndDateNotPresent {
+        @BeforeEach
+        fun setUp() {
+          sendToTopic(
+            "OFFENDER_BOOKING-REASSIGNED",
+            // language=JSON
+            """
           {
             "eventType":"OFFENDER_BOOKING-REASSIGNED",
             "bookingId":"2936648",
@@ -467,23 +515,25 @@ class HMPPSDomainEventsIntTest : QueueListenerIntegrationTest() {
             "lastAdmissionDate":"2024-07-08"
           }
                 """
-            .trimIndent(),
-        )
-      }
+              .trimIndent(),
+          )
+        }
 
-      @Test
-      fun `will publish a domain event`() {
-        await().until { getNumberOfMessagesCurrentlyOnHMPPSEventTestQueue() == 1 }
-        val domainEvent = geMessagesCurrentlyOnHMPPSTestQueue().first()
+        @Test
+        fun `will publish a domain event`() {
+          await().until { getNumberOfMessagesCurrentlyOnHMPPSEventTestQueue() == 1 }
+          val domainEvent = geMessagesCurrentlyOnHMPPSTestQueue().first()
 
-        with(domainEvent) {
-          assertJsonPath("eventType", "prison-offender-events.prisoner.booking.moved")
-          assertJsonPath("additionalInformation.movedToNomsNumber").isEqualTo("A9999CA")
-          assertJsonPath("additionalInformation.movedFromNomsNumber").isEqualTo("A1111CL")
-          assertJsonPath("personReference.identifiers[0].value").isEqualTo("A9999CA")
-          assertJsonPath("personReference.identifiers[0].type").isEqualTo("NOMS")
-          assertJsonPath("additionalInformation.bookingId").asString().isEqualTo("2936648")
-          assertJsonPath("additionalInformation.bookingStartDateTime").isEqualTo("2024-07-08T14:28:10")
+          with(domainEvent) {
+            assertJsonPath("eventType", "prison-offender-events.prisoner.booking.moved")
+            assertJsonPath("additionalInformation.movedToNomsNumber").isEqualTo("A9999CA")
+            assertJsonPath("additionalInformation.movedFromNomsNumber").isEqualTo("A1111CL")
+            assertJsonPath("personReference.identifiers[0].value").isEqualTo("A9999CA")
+            assertJsonPath("personReference.identifiers[0].type").isEqualTo("NOMS")
+            assertJsonPath("additionalInformation.bookingId").asString().isEqualTo("2936648")
+            assertJsonPath("additionalInformation.bookingStartDateTime").isEqualTo("2024-07-08T14:28:10")
+            assertDoesNotExist("additionalInformation.bookingEndDateTime")
+          }
         }
       }
     }

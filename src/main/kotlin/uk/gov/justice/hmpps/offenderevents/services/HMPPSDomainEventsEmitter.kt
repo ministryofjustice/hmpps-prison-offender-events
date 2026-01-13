@@ -474,6 +474,7 @@ class HMPPSDomainEventsEmitter(
       .withAdditionalInformation("movedToNomsNumber", offenderIdDisplay)
       .withAdditionalInformation("movedFromNomsNumber", previousOffenderIdDisplay)
       .withAdditionalInformation("bookingStartDateTime", bookingStartDateTime)
+      .withAdditionalInformation("bookingEndDateTime", bookingEndDateTime)
   }
 
   private fun VisitorRestrictionOffenderEventUpserted.Companion.toDomainEvents(message: VisitorRestrictionOffenderEventUpserted): List<HmppsDomainEvent> = message.toDomainEvents()

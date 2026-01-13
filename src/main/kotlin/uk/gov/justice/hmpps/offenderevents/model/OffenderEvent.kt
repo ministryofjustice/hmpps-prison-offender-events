@@ -64,6 +64,7 @@ class PrisonerBookingMovedOffenderEvent(
   val previousOffenderIdDisplay: String,
   val bookingId: Long,
   val bookingStartDateTime: LocalDateTime,
+  val bookingEndDateTime: LocalDateTime?,
   val lastAdmissionDate: LocalDate,
 ) : OffenderEvent(eventDatetime = eventDatetime, offenderIdDisplay = offenderIdDisplay) {
   companion object
