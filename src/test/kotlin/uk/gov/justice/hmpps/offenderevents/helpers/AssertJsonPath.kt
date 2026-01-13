@@ -15,6 +15,11 @@ fun String?.assertJsonPath(path: String, expectedValue: Any) {
 
 fun String?.assertJsonPath(path: String): ObjectAssert<Any> = assertThat(JsonPathExpectationsHelper(path).evaluateJsonPath(this!!))
 
+fun String?.assertDoesNotExist(path: String) {
+  assertThat(this).isNotNull
+  JsonPathExpectationsHelper(path).doesNotExist(this!!)
+}
+
 fun String?.assertJsonPathIsArray(path: String): ObjectArrayAssert<Any> {
   JsonPathExpectationsHelper(path).assertValueIsArray(this!!)
   val value = JsonPathExpectationsHelper(path).evaluateJsonPath(this) as JSONArray
