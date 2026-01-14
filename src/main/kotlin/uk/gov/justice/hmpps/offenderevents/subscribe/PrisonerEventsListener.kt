@@ -2,14 +2,14 @@
 
 package uk.gov.justice.hmpps.offenderevents.subscribe
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
 import io.awspring.cloud.sqs.listener.QueueAttributes
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.hmpps.offenderevents.services.HMPPSDomainEventsEmitter
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.eventTypeMessageAttributes
@@ -25,7 +25,7 @@ class PrisonerEventsListener(
   @Value("\${application.listener.delayDuration}") private val delay: Duration,
 ) {
   @SqsListener(queueNames = ["prisoneventqueue"], factory = "hmppsQueueContainerFactoryProxy")
-  @Throws(JsonProcessingException::class)
+  @Throws(JacksonException::class)
   fun onPrisonerEvent(message: String?, attributes: QueueAttributes) {
     val sqsMessage: SQSMessage = objectMapper.readValue(message, SQSMessage::class.java)
     val publishedAt = OffsetDateTime.parse(sqsMessage.MessageAttributes.publishedAt.Value)
