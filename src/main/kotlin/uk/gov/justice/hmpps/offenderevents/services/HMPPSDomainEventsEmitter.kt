@@ -357,7 +357,7 @@ class HMPPSDomainEventsEmitter(
 
   private fun ImprisonmentStatusChangedEvent.Companion.toDomainEvents(event: ImprisonmentStatusChangedEvent): List<HmppsDomainEvent> = event.toDomainEvent().toListOrEmptyWhenNull()
 
-  private fun ImprisonmentStatusChangedEvent.toDomainEvent() = if (this.imprisonmentStatusSeq == 0) {
+  private fun ImprisonmentStatusChangedEvent.toDomainEvent() = if (imprisonmentStatusSeq == null || imprisonmentStatusSeq == 0) {
     prisonApiService.getPrisonerNumberForBookingId(this.bookingId).getOrNull()?.let {
       HmppsDomainEvent(
         eventType = "prison-offender-events.prisoner.imprisonment-status-changed",

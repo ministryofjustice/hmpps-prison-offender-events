@@ -273,7 +273,7 @@ class PrisonerAppointmentUpdateEvent(
 class ImprisonmentStatusChangedEvent(
   eventDatetime: LocalDateTime,
   val bookingId: Long,
-  val imprisonmentStatusSeq: Int,
+  val imprisonmentStatusSeq: Int?,
 ) : OffenderEvent(
   eventDatetime = eventDatetime,
   offenderIdDisplay = null,
