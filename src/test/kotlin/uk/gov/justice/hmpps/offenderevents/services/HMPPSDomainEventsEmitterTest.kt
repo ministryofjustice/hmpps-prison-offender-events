@@ -1428,7 +1428,6 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
         """
         {
            "bookingId": 43124234,
-           "imprisonmentStatusSeq": 0,
            "eventDatetime": "2022-12-04T10:00:00"
         } 
         """.trimIndent(),
