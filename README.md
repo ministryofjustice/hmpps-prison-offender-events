@@ -9,7 +9,7 @@ Publishes Events about prison offender changes to Pub / Sub Topics
 
 ## Running localstack
 ```bash
-TMPDIR=/private$TMPDIR docker-compose up localstack
+TMPDIR=/private$TMPDIR docker compose up localstack
 ```
 
 ## Creating the Topic and Queue
