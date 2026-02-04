@@ -22,7 +22,6 @@ generic-service:
   serviceAccountName: prison-offender-events
 
   env:
-    JAVA_OPTS: "-Xmx512m"
     AWS_REGION: "eu-west-2"
     SPRING_PROFILES_ACTIVE: "sns"
 
