@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.hmpps.offenderevents.services.HMPPSDomainEventsEmitter
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -26,7 +26,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 @JsonTest
-internal class PrisonerEventsListenerTest(@Autowired private val objectMapper: ObjectMapper) {
+internal class PrisonerEventsListenerTest(@Autowired private val jsonMapper: JsonMapper) {
   private val hmppsQueueService: HmppsQueueService = mock()
   private val eventsEmitter: HMPPSDomainEventsEmitter = mock()
 
@@ -37,7 +37,7 @@ internal class PrisonerEventsListenerTest(@Autowired private val objectMapper: O
   @BeforeEach
   fun setUp() {
     listener =
-      PrisonerEventsListener(objectMapper, eventsEmitter, hmppsQueueService, Duration.ofMinutes(45), Duration.ofMinutes(15))
+      PrisonerEventsListener(jsonMapper, eventsEmitter, hmppsQueueService, Duration.ofMinutes(45), Duration.ofMinutes(15))
   }
 
   @Nested
@@ -65,7 +65,7 @@ internal class PrisonerEventsListenerTest(@Autowired private val objectMapper: O
 
   @Nested
   internal inner class MessageYoungerThanFortyFiveMinutes {
-    private var receptionMessageBody: String? = null
+    private lateinit var receptionMessageBody: String
     private val prisonEventQueueSqsClient = mock<SqsAsyncClient>()
     private val prisonEventQueueSqsDlqClient = mock<SqsAsyncClient>()
 
@@ -136,7 +136,7 @@ internal class PrisonerEventsListenerTest(@Autowired private val objectMapper: O
 
   @Nested
   internal inner class CaseNotesMessage {
-    private var caseNoteMessageBody: String? = null
+    private lateinit var caseNoteMessageBody: String
     private val prisonEventQueueSqsClient = mock<SqsAsyncClient>()
     private val prisonEventQueueSqsDlqClient = mock<SqsAsyncClient>()
 

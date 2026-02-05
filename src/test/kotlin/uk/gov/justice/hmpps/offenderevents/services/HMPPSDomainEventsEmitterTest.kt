@@ -28,7 +28,7 @@ import software.amazon.awssdk.services.sns.SnsAsyncClient
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sns.model.PublishResponse
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.hmpps.offenderevents.config.OffenderEventsProperties
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPath
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPathDateTimeIsCloseTo
@@ -51,7 +51,7 @@ import java.util.Optional
 import java.util.concurrent.CompletableFuture
 
 @JsonTest
-internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper: ObjectMapper) {
+internal class HMPPSDomainEventsEmitterTest(@Autowired private val jsonMapper: JsonMapper) {
   private lateinit var emitter: HMPPSDomainEventsEmitter
 
   private val receivePrisonerReasonCalculator: ReceivePrisonerReasonCalculator = mock()
@@ -71,7 +71,7 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val objectMapper:
     whenever(hmppsEventSnsClient.publish(any<PublishRequest>())).thenReturn(CompletableFuture.completedFuture(PublishResponse.builder().build()))
     emitter = HMPPSDomainEventsEmitter(
       hmppsQueueService,
-      objectMapper,
+      jsonMapper,
       receivePrisonerReasonCalculator,
       releasePrisonerReasonCalculator,
       telemetryClient,
