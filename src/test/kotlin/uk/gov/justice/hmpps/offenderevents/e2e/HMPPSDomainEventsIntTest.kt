@@ -19,7 +19,8 @@ import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import tools.jackson.core.JacksonException
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.hmpps.offenderevents.helpers.assertDoesNotExist
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPath
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPathDateTimeIsCloseTo
@@ -32,10 +33,7 @@ import java.time.temporal.ChronoUnit
 
 @ExtendWith(PrisonApiExtension::class, HMPPSAuthExtension::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class HMPPSDomainEventsIntTest : QueueListenerIntegrationTest() {
-  @Autowired
-  private lateinit var objectMapper: ObjectMapper
-
+class HMPPSDomainEventsIntTest(@Autowired private val jsonMapper: JsonMapper) : QueueListenerIntegrationTest() {
   @MockitoSpyBean
   private lateinit var emitter: HMPPSDomainEventsEmitter
 
@@ -58,8 +56,8 @@ class HMPPSDomainEventsIntTest : QueueListenerIntegrationTest() {
   }
 
   private fun toSQSMessage(message: String): SQSMessage = try {
-    objectMapper.readValue(message, SQSMessage::class.java)
-  } catch (e: JacksonException) {
+    jsonMapper.readValue(message)
+  } catch (_: JacksonException) {
     throw RuntimeException(String.format("Message %s is not parseable", message))
   }
 

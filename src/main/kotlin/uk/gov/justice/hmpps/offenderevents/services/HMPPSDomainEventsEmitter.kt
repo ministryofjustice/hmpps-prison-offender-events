@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.retry.policy.NeverRetryPolicy
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.hmpps.offenderevents.config.OffenderEventsProperties
 import uk.gov.justice.hmpps.offenderevents.model.AppointmentChangedEvent
@@ -51,7 +51,7 @@ import kotlin.jvm.optionals.getOrNull
 @Service
 class HMPPSDomainEventsEmitter(
   hmppsQueueService: HmppsQueueService,
-  private val objectMapper: ObjectMapper,
+  private val jsonMapper: JsonMapper,
   private val receivePrisonerReasonCalculator: ReceivePrisonerReasonCalculator,
   private val releasePrisonerReasonCalculator: ReleasePrisonerReasonCalculator,
   private val telemetryClient: TelemetryClient,
@@ -100,7 +100,7 @@ class HMPPSDomainEventsEmitter(
     }
   }
 
-  private inline fun <reified T> String.fromJson(): T = objectMapper.readValue(this)
+  private inline fun <reified T> String.fromJson(): T = jsonMapper.readValue(this)
 
   private fun asTelemetryMap(
     event: OffenderEvent,
@@ -128,7 +128,7 @@ class HMPPSDomainEventsEmitter(
 
   fun sendEvent(payload: HmppsDomainEvent) = hmppsEventTopic.publish(
     eventType = payload.eventType,
-    event = objectMapper.writeValueAsString(payload),
+    event = jsonMapper.writeValueAsString(payload),
     attributes = payload.asMetadataMap(),
     retryPolicy = NeverRetryPolicy(),
   )

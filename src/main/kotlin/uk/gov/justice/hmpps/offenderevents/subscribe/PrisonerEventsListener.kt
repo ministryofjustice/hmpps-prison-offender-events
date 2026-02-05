@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import tools.jackson.core.JacksonException
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.hmpps.offenderevents.services.HMPPSDomainEventsEmitter
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.eventTypeMessageAttributes
@@ -18,16 +19,16 @@ import java.time.OffsetDateTime
 
 @Service
 class PrisonerEventsListener(
-  private val objectMapper: ObjectMapper,
+  private val jsonMapper: JsonMapper,
   private val eventsEmitter: HMPPSDomainEventsEmitter,
   private val hmppsQueueService: HmppsQueueService,
-  @Value("\${application.listener.totalDelayDuration}") private val totalDelay: Duration,
+  @Value($$"${application.listener.totalDelayDuration}") private val totalDelay: Duration,
   @Value("\${application.listener.delayDuration}") private val delay: Duration,
 ) {
   @SqsListener(queueNames = ["prisoneventqueue"], factory = "hmppsQueueContainerFactoryProxy")
   @Throws(JacksonException::class)
-  fun onPrisonerEvent(message: String?, attributes: QueueAttributes) {
-    val sqsMessage: SQSMessage = objectMapper.readValue(message, SQSMessage::class.java)
+  fun onPrisonerEvent(message: String, attributes: QueueAttributes) {
+    val sqsMessage: SQSMessage = jsonMapper.readValue(message)
     val publishedAt = OffsetDateTime.parse(sqsMessage.MessageAttributes.publishedAt.Value)
     val eventType = sqsMessage.MessageAttributes.eventType.Value
     if (!DELAYED_EVENT_TYPES.contains(eventType) || publishedAt.isBefore(OffsetDateTime.now().minus(totalDelay))) {
