@@ -56,7 +56,7 @@ class QueueResourceTest : QueueListenerIntegrationTest() {
   fun `should fail it dlq does not exist`() {
     webTestClient.put()
       .uri("/queue-admin/retry-dlq/UNKNOWN_DLQ")
-      .headers(setAuthorisation(roles = listOf("ROLE_QUEUE_ADMIN")))
+      .headers(setAuthorisation(roles = listOf("ROLE_SYSCON__QUEUE_ADMIN")))
       .contentType(MediaType.APPLICATION_JSON)
       .exchange()
       .expectStatus().isNotFound
@@ -83,7 +83,7 @@ class QueueResourceTest : QueueListenerIntegrationTest() {
 
     webTestClient.put()
       .uri("/queue-admin/purge-queue/$prisonEventDlqName")
-      .headers(setAuthorisation(roles = listOf("ROLE_QUEUE_ADMIN")))
+      .headers(setAuthorisation(roles = listOf("ROLE_SYSCON__QUEUE_ADMIN")))
       .contentType(MediaType.APPLICATION_JSON)
       .exchange()
       .expectStatus().isOk

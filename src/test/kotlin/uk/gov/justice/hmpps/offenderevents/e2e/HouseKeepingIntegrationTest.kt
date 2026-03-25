@@ -26,6 +26,7 @@ class HouseKeepingIntegrationTest : QueueListenerIntegrationTest() {
     webTestClient.put()
       .uri("/queue-admin/retry-all-dlqs")
       .accept(MediaType.APPLICATION_JSON)
+      .headers(setAuthorisation(roles = listOf("ROLE_SYSCON__QUEUE_ADMIN")))
       .exchange()
       .expectStatus().isOk
 
