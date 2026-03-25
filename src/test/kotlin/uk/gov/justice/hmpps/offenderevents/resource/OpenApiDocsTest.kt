@@ -83,7 +83,7 @@ class OpenApiDocsTest : IntegrationTestBase() {
   }
 
   @ParameterizedTest
-  @CsvSource(value = ["bearer-jwt, ROLE_QUEUE_ADMIN"])
+  @CsvSource(value = ["bearer-jwt, ROLE_SYSCON__QUEUE_ADMIN"])
   fun `the security scheme is setup for bearer tokens`(key: String, role: String) {
     webTestClient.get()
       .uri("/v3/api-docs")
