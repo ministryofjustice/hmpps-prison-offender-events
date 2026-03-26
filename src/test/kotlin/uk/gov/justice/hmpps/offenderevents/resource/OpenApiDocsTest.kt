@@ -12,6 +12,7 @@ import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTest
 import org.springframework.http.MediaType
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.text.get
 
 @AutoConfigureWebTestClient(timeout = "PT60S")
 class OpenApiDocsTest : IntegrationTestBase() {
@@ -119,6 +120,18 @@ class OpenApiDocsTest : IntegrationTestBase() {
       .expectBody()
       .jsonPath("$.components.schemas.GetDlqResult.required").value<List<String>> {
         assertThat(it).containsExactlyInAnyOrder("messages", "messagesFoundCount", "messagesReturnedCount")
+      }
+  }
+
+  @Test
+  fun `the swagger json don't contain any duplicate methods`() {
+    webTestClient.get()
+      .uri("/v3/api-docs")
+      .accept(MediaType.APPLICATION_JSON)
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().jsonPath("*..operationId").value<List<String>> { list ->
+        assertThat(list).filteredOn { it.contains("_") }.isEmpty()
       }
   }
 }
