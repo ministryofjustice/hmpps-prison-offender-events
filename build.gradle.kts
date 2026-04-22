@@ -42,10 +42,7 @@ dependencies {
   implementation("com.google.code.gson:gson:2.13.2")
   implementation("com.google.guava:guava:33.6.0-jre")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
-  constraints {
-    implementation("org.webjars:swagger-ui:5.32.2")
-  }
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.1.0")
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -65,7 +62,6 @@ dependencies {
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.37") {
     exclude(group = "io.swagger.core.v3")
   }
-  testImplementation("io.swagger.core.v3:swagger-core-jakarta:2.2.41")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.60.1")
 }
 
