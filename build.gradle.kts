@@ -44,6 +44,10 @@ dependencies {
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
 
+  val appinsightsCore = "core:2.6.4"
+  implementation("io.micrometer:micrometer-registry-azure-monitor:1.16.5")
+  implementation("com.microsoft.azure:applicationinsights-$appinsightsCore")
+
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.1.1")
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
   testAnnotationProcessor("org.projectlombok:lombok:1.18.46")
