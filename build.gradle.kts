@@ -14,6 +14,10 @@ configurations {
 testing {
   suites {
     register<JvmTestSuite>("testSmoke") {
+      dependencyCheck {
+        suppressionFiles.add("azure-dependency-check-suppress.xml")
+      }
+
       dependencies {
         implementation(project())
       }
@@ -21,6 +25,10 @@ testing {
   }
 }
 configurations["testSmokeImplementation"].extendsFrom(configurations["testImplementation"])
+
+dependencyCheck {
+  suppressionFiles.add("azure-dependency-check-suppress.xml")
+}
 
 dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
