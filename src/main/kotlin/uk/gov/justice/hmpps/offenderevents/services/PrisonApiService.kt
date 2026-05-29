@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import java.time.Duration
-import java.time.LocalDate
 import java.util.Optional
 
 internal enum class LegalStatus {
@@ -46,14 +46,14 @@ class PrisonApiService(
   internal fun getPrisonerDetails(offenderNumber: String): PrisonerDetails = prisonApiWebClient.get()
     .uri("/api/offenders/{offenderNumber}", offenderNumber)
     .retrieve()
-    .bodyToMono(PrisonerDetails::class.java)
+    .bodyToMono<PrisonerDetails>()
     .block(timeout)!!
 
   internal fun getPrisonerNumberForBookingId(bookingId: Long?): Optional<String> {
     val basicBookingDetail = prisonApiWebClient.get()
       .uri("/api/bookings/{bookingId}?basicInfo=true&extraInfo=false", bookingId)
       .retrieve()
-      .bodyToMono(BasicBookingDetail::class.java)
+      .bodyToMono<BasicBookingDetail>()
       .block(timeout)
     return if (basicBookingDetail != null) Optional.of(basicBookingDetail.offenderNo) else Optional.empty()
   }
@@ -136,6 +136,5 @@ internal data class PrisonerDetails(
   }
 }
 
-internal data class Movement(val directionCode: String, val movementDate: LocalDate)
 internal data class BookingIdentifier(val value: String)
 internal data class BasicBookingDetail(val offenderNo: String)
