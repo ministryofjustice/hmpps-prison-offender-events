@@ -23,7 +23,7 @@ class PrisonerEventsListener(
   private val eventsEmitter: HMPPSDomainEventsEmitter,
   private val hmppsQueueService: HmppsQueueService,
   @Value($$"${application.listener.totalDelayDuration}") private val totalDelay: Duration,
-  @Value("\${application.listener.delayDuration}") private val delay: Duration,
+  @Value($$"${application.listener.delayDuration}") private val delay: Duration,
 ) {
   @SqsListener(queueNames = ["prisoneventqueue"], factory = "hmppsQueueContainerFactoryProxy")
   @Throws(JacksonException::class)

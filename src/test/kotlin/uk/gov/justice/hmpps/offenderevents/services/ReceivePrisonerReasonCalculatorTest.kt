@@ -90,8 +90,7 @@ internal class ReceivePrisonerReasonCalculatorTest {
   }
 
   @Test
-  @DisplayName("when current status indicates not in prison then not really received")
-  fun whenCurrentStatusIndicatesNotInPrisonThenNotReallyReceived() {
+  fun `when current status indicates in prison then they are really received`() {
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(
         PrisonerDetails(
@@ -106,6 +105,28 @@ internal class ReceivePrisonerReasonCalculatorTest {
       )
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").hasPrisonerActuallyBeenReceived())
       .isTrue()
+  }
+
+  @Test
+  fun `when current status indicates out on TAP they are still really received`() {
+    whenever(prisonApiService.getPrisonerDetails(any()))
+      .thenReturn(
+        PrisonerDetails(
+          LegalStatus.REMAND,
+          false,
+          "TAP",
+          "C6",
+          "ACTIVE OUT",
+          "TAP-C6",
+          "MDI",
+        ),
+      )
+    assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").hasPrisonerActuallyBeenReceived())
+      .isTrue()
+  }
+
+  @Test
+  fun `when current status indicates not in prison then not really received`() {
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(
         PrisonerDetails(
