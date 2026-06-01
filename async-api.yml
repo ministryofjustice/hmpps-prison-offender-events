@@ -26,6 +26,8 @@ components:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.appointments-changed.yaml
     prison-offender-events.prisoner.booking.moved:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.booking.moved.yaml
+    prison-offender-events.prisoner.booking.deleted:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.booking.deleted.yaml
     prison-offender-events.prisoner.cell.move:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/prison-offender-events/prisoner.cell.move.yaml
     prison-offender-events.prisoner.contact-added:
@@ -82,6 +84,8 @@ channels:
         $ref: '#/components/messages/prison-offender-events.prisoner.appointments-changed'
       prison-offender-events.prisoner.booking.moved:
         $ref: '#/components/messages/prison-offender-events.prisoner.booking.moved'
+      prison-offender-events.prisoner.booking.deleted:
+        $ref: '#/components/messages/prison-offender-events.prisoner.booking.deleted'
       prison-offender-events.prisoner.cell.move:
         $ref: '#/components/messages/prison-offender-events.prisoner.cell.move'
       prison-offender-events.prisoner.contact-added:
@@ -125,6 +129,7 @@ operations:
     messages:
       - $ref: '#/channels/hmpps-domain-events/messages/prison-offender-events.prisoner.appointments-changed'
       - $ref: '#/channels/hmpps-domain-events/messages/prison-offender-events.prisoner.booking.moved'
+      - $ref: '#/channels/hmpps-domain-events/messages/prison-offender-events.prisoner.booking.deleted'
       - $ref: '#/channels/hmpps-domain-events/messages/prison-offender-events.prisoner.cell.move'
       - $ref: '#/channels/hmpps-domain-events/messages/prison-offender-events.prisoner.contact-added'
       - $ref: '#/channels/hmpps-domain-events/messages/prison-offender-events.prisoner.contact-approved'
