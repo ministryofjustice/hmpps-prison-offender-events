@@ -28,6 +28,7 @@ import uk.gov.justice.hmpps.offenderevents.model.PersonRestrictionOffenderEventD
 import uk.gov.justice.hmpps.offenderevents.model.PersonRestrictionOffenderEventUpserted
 import uk.gov.justice.hmpps.offenderevents.model.PrisonerActivityUpdateEvent
 import uk.gov.justice.hmpps.offenderevents.model.PrisonerAppointmentUpdateEvent
+import uk.gov.justice.hmpps.offenderevents.model.PrisonerBookingDeletedOffenderEvent
 import uk.gov.justice.hmpps.offenderevents.model.PrisonerBookingMovedOffenderEvent
 import uk.gov.justice.hmpps.offenderevents.model.PrisonerDischargedOffenderEvent
 import uk.gov.justice.hmpps.offenderevents.model.PrisonerMergedOffenderEvent
@@ -72,6 +73,7 @@ class HMPPSDomainEventsEmitter(
       "OFFENDER_CONTACT-UPDATED" -> OffenderContactEventUpdated.toDomainEvents(message.fromJson())
       "OFFENDER_CONTACT-DELETED" -> OffenderContactEventDeleted.toDomainEvents(message.fromJson())
       "OFFENDER_BOOKING-REASSIGNED" -> PrisonerBookingMovedOffenderEvent.toDomainEvents(message.fromJson())
+      "BOOKING-DELETED" -> PrisonerBookingDeletedOffenderEvent.toDomainEvents(message.fromJson())
       "BOOKING_NUMBER-CHANGED" -> PrisonerMergedOffenderEvent.toDomainEvents(message.fromJson())
       "OFFENDER_CASE_NOTES-DELETED" -> CaseNoteOffenderEvent.toDomainEvents(message.fromJson())
       "OFFENDER_CASE_NOTES-INSERTED" -> CaseNoteOffenderEvent.toDomainEvents(message.fromJson())
@@ -477,6 +479,18 @@ class HMPPSDomainEventsEmitter(
       .withAdditionalInformation("bookingEndDateTime", bookingEndDateTime)
   }
 
+  private fun PrisonerBookingDeletedOffenderEvent.Companion.toDomainEvents(message: PrisonerBookingDeletedOffenderEvent): List<HmppsDomainEvent> = message.toDomainEvents()
+  private fun PrisonerBookingDeletedOffenderEvent.toDomainEvents(): List<HmppsDomainEvent> = listOf(
+    HmppsDomainEvent(
+      eventType = "prison-offender-events.prisoner.booking.deleted",
+      description = "a NOMIS booking has been deleted",
+      occurredAt = toOccurredAt(),
+      publishedAt = OffsetDateTime.now().toString(),
+      personReference = PersonReference(offenderIdDisplay),
+    )
+      .withAdditionalInformation("bookingId", bookingId),
+  )
+
   private fun VisitorRestrictionOffenderEventUpserted.Companion.toDomainEvents(message: VisitorRestrictionOffenderEventUpserted): List<HmppsDomainEvent> = message.toDomainEvents()
 
   private fun VisitorRestrictionOffenderEventDeleted.Companion.toDomainEvents(fromJson: VisitorRestrictionOffenderEventDeleted): List<HmppsDomainEvent> = fromJson.toDomainEvents()
@@ -547,6 +561,7 @@ class HMPPSDomainEventsEmitter(
           .withAdditionalInformation("agencyLocationId", this.agencyLocationId)
       }
     }
+
     else -> {
       null
     }
