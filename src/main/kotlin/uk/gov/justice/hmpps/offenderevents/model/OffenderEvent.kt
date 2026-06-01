@@ -70,6 +70,14 @@ class PrisonerBookingMovedOffenderEvent(
   companion object
 }
 
+class PrisonerBookingDeletedOffenderEvent(
+  eventDatetime: LocalDateTime,
+  override val offenderIdDisplay: String,
+  val bookingId: Long,
+) : OffenderEvent(eventDatetime = eventDatetime, offenderIdDisplay = offenderIdDisplay) {
+  companion object
+}
+
 class NonAssociationDetailsOffenderEvent(
   eventDatetime: LocalDateTime,
   offenderIdDisplay: String?,
