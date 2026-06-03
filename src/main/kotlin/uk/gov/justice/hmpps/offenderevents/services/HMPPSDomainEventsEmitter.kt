@@ -205,7 +205,7 @@ class HMPPSDomainEventsEmitter(
       }
       throw e
     }
-    if (!releaseReason.hasPrisonerActuallyBeenRelease()) {
+    if (!releaseReason.hasPrisonerActuallyBeenReleased()) {
       telemetryClient.trackEvent(
         "prison-offender-events.prisoner.not-released",
         asTelemetryMap(this, releaseReason, releaseReason.reason.name),

@@ -12,8 +12,10 @@ class ReceivePrisonerReasonCalculator(
     val prisonerDetails = prisonApiService.getPrisonerDetails(offenderNumber)
 
     val reason = when (prisonerDetails.typeOfMovement()) {
-      MovementType.TEMPORARY_ABSENCE -> Reason.TEMPORARY_ABSENCE_RETURN
-      MovementType.COURT -> Reason.RETURN_FROM_COURT
+      // They might not actually be in prison if they were received then went straight out on a TAP
+      // or to court within the (usually 45 mins) grace period
+      MovementType.TEMPORARY_ABSENCE -> if (prisonerDetails.currentLocation() == CurrentLocation.IN_PRISON) Reason.TEMPORARY_ABSENCE_RETURN else Reason.ADMISSION
+      MovementType.COURT -> if (prisonerDetails.currentLocation() == CurrentLocation.IN_PRISON) Reason.RETURN_FROM_COURT else Reason.ADMISSION
       MovementType.ADMISSION -> when (prisonerDetails.movementReason()) {
         TRANSFER -> Reason.TRANSFERRED
         else -> Reason.ADMISSION
