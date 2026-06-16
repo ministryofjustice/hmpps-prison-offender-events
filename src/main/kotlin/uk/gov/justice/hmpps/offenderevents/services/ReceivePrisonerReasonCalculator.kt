@@ -2,6 +2,7 @@ package uk.gov.justice.hmpps.offenderevents.services
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import uk.gov.justice.hmpps.offenderevents.services.CurrentLocation.IN_PRISON
 import uk.gov.justice.hmpps.offenderevents.services.MovementReason.TRANSFER
 
 @Component
@@ -49,10 +50,10 @@ class ReceivePrisonerReasonCalculator(
     val nomisMovementReason: MovementReason,
   ) : PrisonerMovementReason {
     fun hasPrisonerActuallyBeenReceived(): Boolean {
-      if ((currentLocation == CurrentLocation.IN_PRISON) != (currentPrisonStatus == CurrentPrisonStatus.UNDER_PRISON_CARE)) {
+      if ((currentLocation == IN_PRISON) != (currentPrisonStatus == CurrentPrisonStatus.UNDER_PRISON_CARE)) {
         log.warn("hasPrisonerActuallyBeenReceived(): verdict based on active differs from old for $this")
       }
-      return currentPrisonStatus == CurrentPrisonStatus.UNDER_PRISON_CARE
+      return currentLocation == IN_PRISON
     }
   }
 
