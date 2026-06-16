@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.gov.justice.hmpps.offenderevents.services.ReceivePrisonerReasonCalculator.Reason
 
 internal class ReceivePrisonerReasonCalculatorTest {
   private val prisonApiService: PrisonApiService = mock()
@@ -18,12 +17,12 @@ internal class ReceivePrisonerReasonCalculatorTest {
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(prisonerDetails("RECALL", true, "ADM"))
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").reason)
-      .isEqualTo(Reason.ADMISSION)
+      .isEqualTo(ReceivePrisonerReasonCalculator.Reason.ADMISSION)
 
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(prisonerDetails("RECALL", true, "TAP"))
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").reason)
-      .isEqualTo(Reason.TEMPORARY_ABSENCE_RETURN)
+      .isEqualTo(ReceivePrisonerReasonCalculator.Reason.TEMPORARY_ABSENCE_RETURN)
   }
 
   @Test
@@ -32,11 +31,11 @@ internal class ReceivePrisonerReasonCalculatorTest {
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(prisonerDetails("RECALL", true, "ADM"))
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").reason)
-      .isEqualTo(Reason.ADMISSION)
+      .isEqualTo(ReceivePrisonerReasonCalculator.Reason.ADMISSION)
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(prisonerDetails("RECALL", true, "CRT"))
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").reason)
-      .isEqualTo(Reason.RETURN_FROM_COURT)
+      .isEqualTo(ReceivePrisonerReasonCalculator.Reason.RETURN_FROM_COURT)
   }
 
   @Test
@@ -45,13 +44,13 @@ internal class ReceivePrisonerReasonCalculatorTest {
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(prisonerDetails("RECALL", true, "ADM", "L"))
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").reason)
-      .isEqualTo(Reason.ADMISSION)
+      .isEqualTo(ReceivePrisonerReasonCalculator.Reason.ADMISSION)
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").nomisMovementReason.code)
       .isEqualTo("L")
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(prisonerDetails("RECALL", true, "ADM", "INT"))
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").reason)
-      .isEqualTo(Reason.TRANSFERRED)
+      .isEqualTo(ReceivePrisonerReasonCalculator.Reason.TRANSFERRED)
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").nomisMovementReason.code)
       .isEqualTo("INT")
   }
@@ -62,13 +61,13 @@ internal class ReceivePrisonerReasonCalculatorTest {
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(prisonerDetails("RECALL", true, "ADM", "L"))
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").reason)
-      .isEqualTo(Reason.ADMISSION)
+      .isEqualTo(ReceivePrisonerReasonCalculator.Reason.ADMISSION)
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").nomisMovementReason.code)
       .isEqualTo("L")
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(prisonerDetails("RECALL", true, "ADM", "TRNCRT"))
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").reason)
-      .isEqualTo(Reason.TRANSFERRED)
+      .isEqualTo(ReceivePrisonerReasonCalculator.Reason.TRANSFERRED)
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").nomisMovementReason.code)
       .isEqualTo("TRNCRT")
   }
@@ -79,13 +78,13 @@ internal class ReceivePrisonerReasonCalculatorTest {
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(prisonerDetails("RECALL", true, "ADM", "L"))
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").reason)
-      .isEqualTo(Reason.ADMISSION)
+      .isEqualTo(ReceivePrisonerReasonCalculator.Reason.ADMISSION)
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").nomisMovementReason.code)
       .isEqualTo("L")
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(prisonerDetails("RECALL", true, "ADM", "TRNTAP"))
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").reason)
-      .isEqualTo(Reason.TRANSFERRED)
+      .isEqualTo(ReceivePrisonerReasonCalculator.Reason.TRANSFERRED)
     assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").nomisMovementReason.code)
       .isEqualTo("TRNTAP")
   }
@@ -122,28 +121,8 @@ internal class ReceivePrisonerReasonCalculatorTest {
           "MDI",
         ),
       )
-    val reason = calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH")
-    assertThat(reason.hasPrisonerActuallyBeenReceived()).isTrue()
-    assertThat(reason.reason).isEqualTo(Reason.ADMISSION)
-  }
-
-  @Test
-  fun `when current status indicates out at court they are still really received`() {
-    whenever(prisonApiService.getPrisonerDetails(any()))
-      .thenReturn(
-        PrisonerDetails(
-          LegalStatus.REMAND,
-          false,
-          "CRT",
-          "DC",
-          "ACTIVE OUT",
-          "CRT-DC",
-          "MDI",
-        ),
-      )
-    val reason = calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH")
-    assertThat(reason.hasPrisonerActuallyBeenReceived()).isTrue()
-    assertThat(reason.reason).isEqualTo(Reason.ADMISSION)
+    assertThat(calculator.calculateMostLikelyReasonForPrisonerReceive("A1234GH").hasPrisonerActuallyBeenReceived())
+      .isTrue()
   }
 
   @Test

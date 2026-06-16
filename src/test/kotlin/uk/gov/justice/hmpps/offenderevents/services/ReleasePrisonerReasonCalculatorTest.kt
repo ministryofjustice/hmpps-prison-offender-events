@@ -77,7 +77,7 @@ internal class ReleasePrisonerReasonCalculatorTest {
           "MDI",
         ),
       )
-    assertThat(calculator.calculateReasonForRelease("A1234GH").hasPrisonerActuallyBeenReleased()).isTrue()
+    assertThat(calculator.calculateReasonForRelease("A1234GH").hasPrisonerActuallyBeenRelease()).isTrue()
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(
         PrisonerDetails(
@@ -90,7 +90,7 @@ internal class ReleasePrisonerReasonCalculatorTest {
           "MDI",
         ),
       )
-    assertThat(calculator.calculateReasonForRelease("A1234GH").hasPrisonerActuallyBeenReleased()).isTrue()
+    assertThat(calculator.calculateReasonForRelease("A1234GH").hasPrisonerActuallyBeenRelease()).isTrue()
     whenever(prisonApiService.getPrisonerDetails(any()))
       .thenReturn(
         PrisonerDetails(
@@ -103,7 +103,7 @@ internal class ReleasePrisonerReasonCalculatorTest {
           "MDI",
         ),
       )
-    assertThat(calculator.calculateReasonForRelease("A1234GH").hasPrisonerActuallyBeenReleased()).isFalse()
+    assertThat(calculator.calculateReasonForRelease("A1234GH").hasPrisonerActuallyBeenRelease()).isFalse()
   }
 
   private fun prisonerDetails(lastMovementTypCode: String, lastMovementReasonCode: String = "N"): PrisonerDetails = PrisonerDetails(

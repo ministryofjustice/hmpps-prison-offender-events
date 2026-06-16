@@ -80,6 +80,6 @@ class ReleasePrisonerReasonCalculator(private val prisonApiService: PrisonApiSer
     override val prisonId: String,
     val nomisMovementReason: MovementReason,
   ) : PrisonerMovementReason {
-    fun hasPrisonerActuallyBeenReleased(): Boolean = currentLocation != CurrentLocation.IN_PRISON
+    fun hasPrisonerActuallyBeenRelease(): Boolean = currentLocation != CurrentLocation.IN_PRISON
   }
 }
