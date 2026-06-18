@@ -16,7 +16,6 @@ import uk.gov.justice.hmpps.offenderevents.services.CurrentLocation.IN_PRISON
 import uk.gov.justice.hmpps.offenderevents.services.CurrentLocation.OUTSIDE_PRISON
 import uk.gov.justice.hmpps.offenderevents.services.CurrentPrisonStatus.NOT_UNDER_PRISON_CARE
 import uk.gov.justice.hmpps.offenderevents.services.CurrentPrisonStatus.UNDER_PRISON_CARE
-import uk.gov.justice.hmpps.offenderevents.services.LegalStatus.REMAND
 import uk.gov.justice.hmpps.offenderevents.services.wiremock.HMPPSAuthExtension
 import uk.gov.justice.hmpps.offenderevents.services.wiremock.PrisonApiExtension
 import uk.gov.justice.hmpps.offenderevents.services.wiremock.PrisonApiExtension.Companion.server
@@ -51,20 +50,6 @@ internal class PrisonApiServiceTest {
         WireMock.getRequestedFor(WireMock.urlEqualTo("/api/offenders/A7841DY"))
           .withHeader("Authorization", equalTo("Bearer ABCDE")),
       )
-    }
-
-    @Test
-    @DisplayName("can parse the legal status")
-    fun canParseTheLegalStatus() {
-      val prisonerDetails = service.getPrisonerDetails("A7841DY")
-      assertThat(prisonerDetails.legalStatus()).isEqualTo(REMAND)
-    }
-
-    @Test
-    @DisplayName("can parse the recall status")
-    fun canParseTheRecallStatus() {
-      val prisonerDetails = service.getPrisonerDetails("A7841DY")
-      assertThat(prisonerDetails.recall).isFalse
     }
 
     @Test

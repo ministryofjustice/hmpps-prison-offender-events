@@ -2,6 +2,7 @@ package uk.gov.justice.hmpps.offenderevents.services
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import uk.gov.justice.hmpps.offenderevents.model.PrisonerReceivedOffenderEvent
 import uk.gov.justice.hmpps.offenderevents.services.CurrentLocation.IN_PRISON
 import uk.gov.justice.hmpps.offenderevents.services.MovementReason.TRANSFER
 
@@ -9,38 +10,35 @@ import uk.gov.justice.hmpps.offenderevents.services.MovementReason.TRANSFER
 class ReceivePrisonerReasonCalculator(
   private val prisonApiService: PrisonApiService,
 ) {
-  internal fun calculateMostLikelyReasonForPrisonerReceive(offenderNumber: String): ReceiveReason {
-    val prisonerDetails = prisonApiService.getPrisonerDetails(offenderNumber)
+  internal fun calculateMostLikelyReasonForPrisonerReceive(event: PrisonerReceivedOffenderEvent): ReceiveReason {
+    val prisonerDetails = prisonApiService.getPrisonerDetails(event.offenderIdDisplay)
+    val movements = event.bookingId?.let { prisonApiService.getMovementsByBooking(it) }
+    val receiveMovement = movements?.find { it.sequence == event.movementSeq }
 
-    val reason = when (prisonerDetails.typeOfMovement()) {
+    val reason = when (receiveMovement?.typeOfMovement()) {
       // They might not actually be in prison if they were received then went straight out on a TAP
       // or to court within the (usually 45 mins) grace period
 
-      MovementType.TEMPORARY_ABSENCE -> when (prisonerDetails.currentLocation()) {
-        IN_PRISON -> Reason.TEMPORARY_ABSENCE_RETURN
-        else -> Reason.ADMISSION
-      }
-
-      MovementType.COURT -> when (prisonerDetails.currentLocation()) {
-        IN_PRISON -> Reason.RETURN_FROM_COURT
-        else -> Reason.ADMISSION
-      }
-
-      MovementType.ADMISSION -> when (prisonerDetails.movementReason()) {
+      MovementType.TEMPORARY_ABSENCE -> Reason.TEMPORARY_ABSENCE_RETURN
+      MovementType.COURT -> Reason.RETURN_FROM_COURT
+      MovementType.ADMISSION -> when (receiveMovement.movementReason()) {
         TRANSFER -> Reason.TRANSFERRED
         else -> Reason.ADMISSION
       }
-
       else -> Reason.ADMISSION
     }
+    val status = receiveMovement?.let { "ACTIVE ${receiveMovement.directionCode}" } ?: prisonerDetails.status
+    val statusReason = receiveMovement?.let { "${receiveMovement.movementType}-${receiveMovement.movementReasonCode}" }
+      ?: prisonerDetails.statusReason
+    val nomisMovementReasonCode = receiveMovement?.movementReasonCode ?: prisonerDetails.lastMovementReasonCode
 
     return ReceiveReason(
       reason = reason,
-      details = "${prisonerDetails.status}:${prisonerDetails.statusReason}",
+      details = "$status:$statusReason",
       currentLocation = prisonerDetails.currentLocation(),
       currentPrisonStatus = prisonerDetails.currentPrisonStatus(),
       prisonId = prisonerDetails.latestLocationId,
-      nomisMovementReason = MovementReason(prisonerDetails.lastMovementReasonCode),
+      nomisMovementReason = MovementReason(nomisMovementReasonCode),
     )
   }
 

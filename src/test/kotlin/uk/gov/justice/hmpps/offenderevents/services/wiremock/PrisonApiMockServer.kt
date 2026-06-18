@@ -2,10 +2,9 @@ package uk.gov.justice.hmpps.offenderevents.services.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.function.Function
-import java.util.stream.Collectors
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
 
 class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
   fun stubPrisonerDetails(
@@ -18,7 +17,7 @@ class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
     latestLocationId: String,
   ) {
     stubFor(
-      WireMock.get(String.format("/api/offenders/%s", offenderNumber)).willReturn(
+      get(String.format("/api/offenders/%s", offenderNumber)).willReturn(
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(
@@ -39,7 +38,7 @@ class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
 
   fun stubPrisonerDetails404(offenderNumber: String?) {
     stubFor(
-      WireMock.get(String.format("/api/offenders/%s", offenderNumber)).willReturn(
+      get(String.format("/api/offenders/%s", offenderNumber)).willReturn(
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
           .withStatus(404),
@@ -48,12 +47,12 @@ class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
   }
 
   fun verifyPrisonerDetails404(offenderNumber: String?) {
-    verify(WireMock.getRequestedFor(WireMock.urlEqualTo(String.format("/api/offenders/%s", offenderNumber))))
+    verify(getRequestedFor(WireMock.urlEqualTo(String.format("/api/offenders/%s", offenderNumber))))
   }
 
   fun stubBasicPrisonerDetails(offenderNumber: String, bookingId: Long?) {
     stubFor(
-      WireMock.get(String.format("/api/bookings/%d?basicInfo=true&extraInfo=false", bookingId)).willReturn(
+      get(String.format("/api/bookings/%d?basicInfo=true&extraInfo=false", bookingId)).willReturn(
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(basicPrisonerDetails(offenderNumber, bookingId))
@@ -64,7 +63,7 @@ class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
 
   fun stubPrisonerIdentifiers(mergedNumber: String, bookingId: Long?) {
     stubFor(
-      WireMock.get(String.format("/api/bookings/%d/identifiers?type=MERGED", bookingId)).willReturn(
+      get(String.format("/api/bookings/%d/identifiers?type=MERGED", bookingId)).willReturn(
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(mergeIdentifier(mergedNumber))
@@ -73,63 +72,47 @@ class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
     )
   }
 
-  fun stubMovements(offenderNumber: String?, movements: List<MovementFragment>) {
-    val asJson = Function { (directionCode, movementDateTime): MovementFragment ->
-      val createDateTime = movementDateTime.format(
-        DateTimeFormatter.ISO_DATE_TIME,
-      )
-      val movementDate = movementDateTime
-        .toLocalDate()
-        .format(DateTimeFormatter.ISO_DATE)
-      val movementTime = movementDateTime
-        .toLocalTime()
-        .format(DateTimeFormatter.ISO_LOCAL_TIME)
-      String.format(
-        """
-                    {
-                        "offenderNo": "%s",
-                        "createDateTime": "%s",
-                        "fromAgency": "WWI",
-                        "fromAgencyDescription": "Wandsworth (HMP)",
-                        "toAgency": "FBI",
-                        "toAgencyDescription": "Forest Bank (HMP & YOI)",
-                        "fromCity": "",
-                        "toCity": "",
-                        "movementType": "%s",
-                        "movementTypeDescription": "some description",
-                        "directionCode": "%s",
-                        "movementDate": "%s",
-                        "movementTime": "%s",
-                        "movementReason": "some reason"
-                    }
-                
-        """.trimIndent(),
-        offenderNumber,
-        createDateTime,
-        if (directionCode == "IN") "ADM" else "REL",
-        directionCode,
-        movementDate,
-        movementTime,
-      )
+  fun stubGetMovementsByBooking(
+    bookingId: Long?,
+    response: String = """
+  [
+    {
+      "sequence": 10,
+      "fromAgency": "NHI",
+      "toAgency": "SHEFCC",
+      "movementType": "CRT",
+      "directionCode": "OUT",
+      "movementDateTime": "2023-02-10T08:11:00",
+      "movementReasonCode": "PR",
+      "createdDateTime": "2023-02-10T08:11:22.685037",
+      "modifiedDateTime": "2023-02-10T14:19:14.560498"
+    },
+    {
+      "sequence": 11,
+      "fromAgency": "NHI",
+      "toAgency": "SHEFCC",
+      "movementType": "CRT",
+      "directionCode": "OUT",
+      "movementDateTime": "2023-02-10T08:11:00",
+      "movementReasonCode": "PR",
+      "createdDateTime": "2023-02-10T08:11:22.685037",
+      "modifiedDateTime": "2023-02-10T14:19:14.560498"
+    },
+    {
+      "sequence": 12,
+      "fromAgency": "NHI",
+      "toAgency": "SHEFCC",
+      "movementType": "CRT",
+      "directionCode": "OUT",
+      "movementDateTime": "2023-02-10T08:11:00",
+      "movementReasonCode": "PR",
+      "createdDateTime": "2023-02-10T08:11:22.685037",
+      "modifiedDateTime": "2023-02-10T14:19:14.560498"
     }
-    stubFor(
-      WireMock.post("/api/movements/offenders?latestOnly=false&allBookings=true").willReturn(
-        WireMock.aResponse()
-          .withHeader("Content-Type", "application/json")
-          .withBody(
-            String.format(
-              """
-                        [
-                            %s
-                        ]
-                        
-              """.trimIndent(),
-              movements.stream().map(asJson).collect(Collectors.joining(",")),
-            ),
-          )
-          .withStatus(200),
-      ),
-    )
+  ]
+    """.trimIndent(),
+  ) {
+    stubFor(get(String.format("/api/movements/booking/%d", bookingId)).willReturn(okJson(response)))
   }
 
   private fun prisonerDetails(
@@ -140,10 +123,10 @@ class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
     lastMovementReasonCode: String,
     status: String,
     latestLocationId: String,
-  ): String = String.format(
+  ): String =
     """
             {
-                "offenderNo": "%s",
+                "offenderNo": "$offenderNumber",
                 "bookingId": 1201233,
                 "bookingNo": "38559A",
                 "offenderId": 2582162,
@@ -189,12 +172,12 @@ class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
                 "offenceHistory": [],
                 "sentenceTerms": [],
                 "aliases": [],
-                "status": "%s",
-                "statusReason": "ADM-N",
-                "lastMovementTypeCode": "%s",
-                "lastMovementReasonCode": "%s",
-                "legalStatus": "%s",
-                "recall": %b,
+                "status": "$status",
+                "statusReason": "$lastMovementTypeCode-$lastMovementReasonCode",
+                "lastMovementTypeCode": "$lastMovementTypeCode",
+                "lastMovementReasonCode": "$lastMovementReasonCode",
+                "legalStatus": "$legalStatus",
+                "recall": $recall,
                 "imprisonmentStatus": "TRL",
                 "imprisonmentStatusDescription": "Committed to Crown Court for Trial",
                 "privilegeSummary": {
@@ -207,18 +190,10 @@ class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
                 },
                 "receptionDate": "2021-06-01",
                 "locationDescription": "Moorland (HMP & YOI)",
-                "latestLocationId": "%s"
+                "latestLocationId": "$latestLocationId"
             }
                         
-    """.trimIndent(),
-    offenderNumber,
-    status,
-    lastMovementTypeCode,
-    lastMovementReasonCode,
-    legalStatus,
-    recall,
-    latestLocationId,
-  )
+    """.trimIndent()
 
   private fun basicPrisonerDetails(offenderNumber: String, bookingId: Long?): String = String.format(
     """
@@ -253,7 +228,7 @@ class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
             {"status": "down"}
     """.trimIndent()
     stubFor(
-      WireMock.get("/health/ping").willReturn(
+      get("/health/ping").willReturn(
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) up else down)
@@ -261,7 +236,4 @@ class PrisonApiMockServer internal constructor() : WireMockServer(8086) {
       ),
     )
   }
-
-  @JvmRecord
-  data class MovementFragment(val directionCode: String, val movementDateTime: LocalDateTime)
 }
