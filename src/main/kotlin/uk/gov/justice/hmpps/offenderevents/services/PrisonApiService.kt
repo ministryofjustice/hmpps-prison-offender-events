@@ -69,27 +69,10 @@ class PrisonApiService(
 internal data class PrisonerDetails(
   val lastMovementTypeCode: String,
   val lastMovementReasonCode: String,
-  val status: String?, // e.g. 'ACTIVE IN'
-  val statusReason: String, // type-reason, e.g. TAP-OPA
-  val latestLocationId: String, // prison e.g. SWI
+  val status: String?,
+  val statusReason: String,
+  val latestLocationId: String,
 ) {
-  fun typeOfMovement(): MovementType = when (lastMovementTypeCode) {
-    "TAP" -> MovementType.TEMPORARY_ABSENCE
-    "ADM" -> MovementType.ADMISSION
-    "REL" -> MovementType.RELEASED
-    "CRT" -> MovementType.COURT
-    "TRN" -> MovementType.TRANSFER
-    else -> MovementType.OTHER
-  }
-
-  fun movementReason(): MovementReason = when (lastMovementReasonCode) {
-    "HP" -> MovementReason.HOSPITALISATION
-    TRANSFER_IN, TRANSFER_IN_VIA_COURT, TRANSFER_IN_VIA_TAP -> MovementReason.TRANSFER
-    LICENCE_REVOKED, RECALL_FROM_HDC, RECALL_FROM_DETENTION_TRAINING_ORDER -> MovementReason.RECALL
-    UNCONVICTED_REMAND -> MovementReason.REMAND
-    else -> MovementReason.OTHER
-  }
-
   fun currentLocation(): CurrentLocation? = status?.let { secondOf(it) }
     ?.let {
       when (it) {
@@ -165,21 +148,21 @@ data class BookingMovement(
 
   @Schema(description = "DB modify timestamp")
   val modifiedDateTime: LocalDateTime? = null,
-) {
-  fun typeOfMovement(): MovementType = when (movementType) {
-    "TAP" -> MovementType.TEMPORARY_ABSENCE
-    "ADM" -> MovementType.ADMISSION
-    "REL" -> MovementType.RELEASED
-    "CRT" -> MovementType.COURT
-    "TRN" -> MovementType.TRANSFER
-    else -> MovementType.OTHER
-  }
+)
 
-  fun movementReason(): MovementReason = when (movementReasonCode) {
-    "HP" -> MovementReason.HOSPITALISATION
-    TRANSFER_IN, TRANSFER_IN_VIA_COURT, TRANSFER_IN_VIA_TAP -> MovementReason.TRANSFER
-    LICENCE_REVOKED, RECALL_FROM_HDC, RECALL_FROM_DETENTION_TRAINING_ORDER -> MovementReason.RECALL
-    UNCONVICTED_REMAND -> MovementReason.REMAND
-    else -> MovementReason.OTHER
-  }
+fun typeOfMovement(movementTypeCode: String?): MovementType = when (movementTypeCode) {
+  "TAP" -> MovementType.TEMPORARY_ABSENCE
+  "ADM" -> MovementType.ADMISSION
+  "REL" -> MovementType.RELEASED
+  "CRT" -> MovementType.COURT
+  "TRN" -> MovementType.TRANSFER
+  else -> MovementType.OTHER
+}
+
+fun movementReason(movementReasonCode: String?): MovementReason = when (movementReasonCode) {
+  "HP" -> MovementReason.HOSPITALISATION
+  TRANSFER_IN, TRANSFER_IN_VIA_COURT, TRANSFER_IN_VIA_TAP -> MovementReason.TRANSFER
+  LICENCE_REVOKED, RECALL_FROM_HDC, RECALL_FROM_DETENTION_TRAINING_ORDER -> MovementReason.RECALL
+  UNCONVICTED_REMAND -> MovementReason.REMAND
+  else -> MovementReason.OTHER
 }

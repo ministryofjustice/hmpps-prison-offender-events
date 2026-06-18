@@ -15,13 +15,10 @@ class ReceivePrisonerReasonCalculator(
     val movements = event.bookingId?.let { prisonApiService.getMovementsByBooking(it) }
     val receiveMovement = movements?.find { it.sequence == event.movementSeq }
 
-    val reason = when (receiveMovement?.typeOfMovement()) {
-      // They might not actually be in prison if they were received then went straight out on a TAP
-      // or to court within the (usually 45 mins) grace period
-
+    val reason = when (typeOfMovement(receiveMovement?.movementType)) {
       MovementType.TEMPORARY_ABSENCE -> Reason.TEMPORARY_ABSENCE_RETURN
       MovementType.COURT -> Reason.RETURN_FROM_COURT
-      MovementType.ADMISSION -> when (receiveMovement.movementReason()) {
+      MovementType.ADMISSION -> when (movementReason(receiveMovement?.movementReasonCode)) {
         TRANSFER -> Reason.TRANSFERRED
         else -> Reason.ADMISSION
       }
