@@ -154,7 +154,7 @@ class HMPPSDomainEventsEmitter(
   private fun PrisonerReceivedOffenderEvent.toDomainEvent(): HmppsDomainEvent? {
     val offenderNumber = this.offenderIdDisplay
     val receivedReason: ReceiveReason = try {
-      receivePrisonerReasonCalculator.calculateMostLikelyReasonForPrisonerReceive(offenderNumber)
+      receivePrisonerReasonCalculator.calculateMostLikelyReasonForPrisonerReceive(this)
     } catch (e: WebClientResponseException) {
       if (e.statusCode == HttpStatus.NOT_FOUND) {
         // Possibly the offender has been merged since the receive event
@@ -205,7 +205,7 @@ class HMPPSDomainEventsEmitter(
       }
       throw e
     }
-    if (!releaseReason.hasPrisonerActuallyBeenRelease()) {
+    if (!releaseReason.hasPrisonerActuallyBeenReleased()) {
       telemetryClient.trackEvent(
         "prison-offender-events.prisoner.not-released",
         asTelemetryMap(this, releaseReason, releaseReason.reason.name),

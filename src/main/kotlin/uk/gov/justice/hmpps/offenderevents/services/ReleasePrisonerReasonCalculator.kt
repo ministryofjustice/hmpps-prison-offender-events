@@ -11,7 +11,7 @@ class ReleasePrisonerReasonCalculator(private val prisonApiService: PrisonApiSer
     val currentPrisonStatus = prisonerDetails.currentPrisonStatus()
     val latestLocationId = prisonerDetails.latestLocationId
     val nomisMovementReason = MovementReason(prisonerDetails.lastMovementReasonCode)
-    val reasonWithDetails = when (prisonerDetails.typeOfMovement()) {
+    val reasonWithDetails = when (typeOfMovement(prisonerDetails.lastMovementTypeCode)) {
       MovementType.TEMPORARY_ABSENCE -> ReasonWithDetails(
         reason = Reason.TEMPORARY_ABSENCE_RELEASE,
         nomisMovementReason = MovementReason(prisonerDetails.lastMovementReasonCode),
@@ -28,7 +28,7 @@ class ReleasePrisonerReasonCalculator(private val prisonApiService: PrisonApiSer
       )
 
       MovementType.RELEASED -> {
-        val reason = when (prisonerDetails.movementReason()) {
+        val reason = when (movementReason(prisonerDetails.lastMovementReasonCode)) {
           HOSPITALISATION -> Reason.RELEASED_TO_HOSPITAL
           else -> Reason.RELEASED
         }
@@ -80,6 +80,6 @@ class ReleasePrisonerReasonCalculator(private val prisonApiService: PrisonApiSer
     override val prisonId: String,
     val nomisMovementReason: MovementReason,
   ) : PrisonerMovementReason {
-    fun hasPrisonerActuallyBeenRelease(): Boolean = currentLocation != CurrentLocation.IN_PRISON
+    fun hasPrisonerActuallyBeenReleased(): Boolean = currentLocation != CurrentLocation.IN_PRISON
   }
 }

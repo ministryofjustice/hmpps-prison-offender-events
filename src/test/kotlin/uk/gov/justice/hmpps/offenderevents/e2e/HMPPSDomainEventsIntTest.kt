@@ -85,7 +85,7 @@ class HMPPSDomainEventsIntTest(@Autowired private val jsonMapper: JsonMapper) : 
         //language=JSON
         """
           {
-               "eventType":"OFFENDER_MOVEMENT-RECEPTION",
+              "eventType":"OFFENDER_MOVEMENT-RECEPTION",
               "eventDatetime":"2021-06-08T14:41:11.526762",
               "offenderIdDisplay":"A5194DY",
               "bookingId":1201234,
@@ -103,6 +103,24 @@ class HMPPSDomainEventsIntTest(@Autowired private val jsonMapper: JsonMapper) : 
       @BeforeEach
       fun setUp() {
         PrisonApiExtension.server.stubPrisonerDetails("A5194DY", "RECALL", true, "ADM", "R", "ACTIVE IN", "MDI")
+        PrisonApiExtension.server.stubGetMovementsByBooking(
+          1201234,
+          //language=JSON
+          """[
+            {
+              "sequence": 11,
+              "fromAgency": "SHEFCC",
+              "toAgency": "MDI",
+              "movementType": "ADM",
+              "directionCode": "IN",
+              "movementDateTime": "2023-02-10T08:11:00",
+              "movementReasonCode": "R",
+              "createdDateTime": "2023-02-10T08:11:22.685037",
+              "modifiedDateTime": "2023-02-10T14:19:14.560498"
+            }
+            ]
+          """.trimIndent(),
+        )
       }
 
       @Test
@@ -123,10 +141,11 @@ class HMPPSDomainEventsIntTest(@Autowired private val jsonMapper: JsonMapper) : 
           assertJsonPath("occurredAt", "2021-06-08T14:41:11.526762+01:00")
           assertJsonPathDateTimeIsCloseTo("publishedAt", OffsetDateTime.now(), within(10, ChronoUnit.SECONDS))
           assertJsonPath("additionalInformation.reason").isEqualTo("ADMISSION")
-          assertJsonPath("additionalInformation.prisonId").isEqualTo("MDI")
+          assertJsonPath("additionalInformation.details").isEqualTo("ACTIVE IN:ADM-R")
           assertJsonPath("additionalInformation.currentLocation").isEqualTo("IN_PRISON")
-          assertJsonPath("additionalInformation.currentPrisonStatus")
-            .isEqualTo("UNDER_PRISON_CARE")
+          assertJsonPath("additionalInformation.prisonId").isEqualTo("MDI")
+          assertJsonPath("additionalInformation.nomisMovementReasonCode").isEqualTo("R")
+          assertJsonPath("additionalInformation.currentPrisonStatus").isEqualTo("UNDER_PRISON_CARE")
         }
       }
     }

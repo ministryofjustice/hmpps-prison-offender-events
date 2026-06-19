@@ -1,27 +1,22 @@
 package uk.gov.justice.hmpps.offenderevents.services
 
+import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import uk.gov.justice.hmpps.offenderevents.services.PrisonerDetails.Companion.LICENCE_REVOKED
+import uk.gov.justice.hmpps.offenderevents.services.PrisonerDetails.Companion.RECALL_FROM_DETENTION_TRAINING_ORDER
+import uk.gov.justice.hmpps.offenderevents.services.PrisonerDetails.Companion.RECALL_FROM_HDC
+import uk.gov.justice.hmpps.offenderevents.services.PrisonerDetails.Companion.TRANSFER_IN
+import uk.gov.justice.hmpps.offenderevents.services.PrisonerDetails.Companion.TRANSFER_IN_VIA_COURT
+import uk.gov.justice.hmpps.offenderevents.services.PrisonerDetails.Companion.TRANSFER_IN_VIA_TAP
+import uk.gov.justice.hmpps.offenderevents.services.PrisonerDetails.Companion.UNCONVICTED_REMAND
 import java.time.Duration
+import java.time.LocalDateTime
 import java.util.Optional
 
-internal enum class LegalStatus {
-  RECALL,
-  DEAD,
-  INDETERMINATE_SENTENCE,
-  SENTENCED,
-  CONVICTED_UNSENTENCED,
-  CIVIL_PRISONER,
-  IMMIGRATION_DETAINEE,
-  REMAND,
-  UNKNOWN,
-  OTHER,
-}
-
-internal enum class MovementType {
+enum class MovementType {
   TEMPORARY_ABSENCE,
   COURT,
   ADMISSION,
@@ -30,7 +25,7 @@ internal enum class MovementType {
   OTHER,
 }
 
-internal enum class MovementReason {
+enum class MovementReason {
   HOSPITALISATION,
   TRANSFER,
   RECALL,
@@ -41,7 +36,7 @@ internal enum class MovementReason {
 @Service
 class PrisonApiService(
   private val prisonApiWebClient: WebClient,
-  @Value("\${api.prisoner-timeout:30s}") private val timeout: Duration,
+  @Value($$"${api.prisoner-timeout:30s}") private val timeout: Duration,
 ) {
   internal fun getPrisonerDetails(offenderNumber: String): PrisonerDetails = prisonApiWebClient.get()
     .uri("/api/offenders/{offenderNumber}", offenderNumber)
@@ -61,38 +56,23 @@ class PrisonApiService(
   internal fun getIdentifiersByBookingId(bookingId: Long?): List<BookingIdentifier>? = prisonApiWebClient.get()
     .uri("/api/bookings/{bookingId}/identifiers?type=MERGED", bookingId)
     .retrieve()
-    .bodyToMono<List<BookingIdentifier>>(object : ParameterizedTypeReference<List<BookingIdentifier>>() {})
+    .bodyToMono<List<BookingIdentifier>>()
     .block(timeout)
+
+  fun getMovementsByBooking(bookingId: Long): List<BookingMovement> = prisonApiWebClient.get()
+    .uri("/api/movements/booking/{bookingId}", bookingId)
+    .retrieve()
+    .bodyToMono<List<BookingMovement>>()
+    .block(timeout)!!
 }
 
 internal data class PrisonerDetails(
-  private val legalStatus: LegalStatus?,
-  val recall: Boolean,
   val lastMovementTypeCode: String,
   val lastMovementReasonCode: String,
   val status: String?,
   val statusReason: String,
   val latestLocationId: String,
 ) {
-  fun legalStatus(): LegalStatus = legalStatus ?: LegalStatus.UNKNOWN
-
-  fun typeOfMovement(): MovementType = when (lastMovementTypeCode) {
-    "TAP" -> MovementType.TEMPORARY_ABSENCE
-    "ADM" -> MovementType.ADMISSION
-    "REL" -> MovementType.RELEASED
-    "CRT" -> MovementType.COURT
-    "TRN" -> MovementType.TRANSFER
-    else -> MovementType.OTHER
-  }
-
-  fun movementReason(): MovementReason = when (lastMovementReasonCode) {
-    "HP" -> MovementReason.HOSPITALISATION
-    TRANSFER_IN, TRANSFER_IN_VIA_COURT, TRANSFER_IN_VIA_TAP -> MovementReason.TRANSFER
-    LICENCE_REVOKED, RECALL_FROM_HDC, RECALL_FROM_DETENTION_TRAINING_ORDER -> MovementReason.RECALL
-    UNCONVICTED_REMAND -> MovementReason.REMAND
-    else -> MovementReason.OTHER
-  }
-
   fun currentLocation(): CurrentLocation? = status?.let { secondOf(it) }
     ?.let {
       when (it) {
@@ -138,3 +118,51 @@ internal data class PrisonerDetails(
 
 internal data class BookingIdentifier(val value: String)
 internal data class BasicBookingDetail(val offenderNo: String)
+
+data class BookingMovement(
+  @Schema(description = "Sequence number")
+  val sequence: Int?,
+
+  @Schema(description = "Agency travelling from")
+  val fromAgency: String? = null,
+
+  @Schema(description = "Agency travelling to")
+  val toAgency: String? = null,
+
+  @Schema(
+    allowableValues = ["ADM", "CRT", "REL", "TAP", "TRN"],
+  )
+  val movementType: String? = null,
+
+  @Schema(description = "IN or OUT")
+  val directionCode: String? = null,
+
+  @Schema(description = "Movement timestamp")
+  val movementDateTime: LocalDateTime? = null,
+
+  @Schema(description = "Code of movement reason")
+  val movementReasonCode: String? = null,
+
+  @Schema(description = "DB create timestamp")
+  val createdDateTime: LocalDateTime? = null,
+
+  @Schema(description = "DB modify timestamp")
+  val modifiedDateTime: LocalDateTime? = null,
+)
+
+fun typeOfMovement(movementTypeCode: String?): MovementType = when (movementTypeCode) {
+  "TAP" -> MovementType.TEMPORARY_ABSENCE
+  "ADM" -> MovementType.ADMISSION
+  "REL" -> MovementType.RELEASED
+  "CRT" -> MovementType.COURT
+  "TRN" -> MovementType.TRANSFER
+  else -> MovementType.OTHER
+}
+
+fun movementReason(movementReasonCode: String?): MovementReason = when (movementReasonCode) {
+  "HP" -> MovementReason.HOSPITALISATION
+  TRANSFER_IN, TRANSFER_IN_VIA_COURT, TRANSFER_IN_VIA_TAP -> MovementReason.TRANSFER
+  LICENCE_REVOKED, RECALL_FROM_HDC, RECALL_FROM_DETENTION_TRAINING_ORDER -> MovementReason.RECALL
+  UNCONVICTED_REMAND -> MovementReason.REMAND
+  else -> MovementReason.OTHER
+}

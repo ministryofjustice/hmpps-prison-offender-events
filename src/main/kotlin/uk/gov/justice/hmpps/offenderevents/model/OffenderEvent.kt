@@ -37,6 +37,8 @@ class CellMoveOffenderEvent(
 class PrisonerReceivedOffenderEvent(
   eventDatetime: LocalDateTime,
   override val offenderIdDisplay: String,
+  val bookingId: Long? = null,
+  val movementSeq: Int? = null,
 ) : OffenderEvent(eventDatetime = eventDatetime, offenderIdDisplay = offenderIdDisplay) {
   companion object
 }
