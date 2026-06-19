@@ -13,7 +13,7 @@ generic-service:
     APPLICATION_LISTENER_TOTALDELAYDURATION: "PT45M"
     APPLICATION_LISTENER_DELAYDURATION: "PT10M"
 
-# CloudPlatform AlertManager receiver to route promethues alerts to slack
+# CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   alertSeverity: syscon
 
@@ -23,6 +23,6 @@ generic-prometheus-alerts:
     - "Digital-Prison-Services-prod-prisoner_offender_events_queue_dl"
 
   # AWS SNS Topics to monitor.
-  # Note: the topics dont have nice names, so just supply the name as a key, and a nice name as a value.
+  # Note: the topics do not have nice names, so just supply the name as a key, and a nice name as a value.
   snsAlertsTopicNames:
     cloud-platform-Digital-Prison-Services-160f3055cc4e04c4105ee85f2ed1fccb: "offender-events"

@@ -18,7 +18,7 @@ generic-service:
     APPLICATION_LISTENER_TOTALDELAYDURATION: "PT45M"
     APPLICATION_LISTENER_DELAYDURATION: "PT10M"
 
-# CloudPlatform AlertManager receiver to route promethues alerts to slack
+# CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   businessHoursOnly: true
   alertSeverity: syscon-nonprod
