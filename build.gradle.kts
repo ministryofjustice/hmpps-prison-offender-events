@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.5.2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.5.6"
   kotlin("plugin.spring") version "2.4.0"
 }
 
@@ -26,10 +26,6 @@ testing {
 }
 configurations["testSmokeImplementation"].extendsFrom(configurations["testImplementation"])
 
-dependencyCheck {
-  suppressionFiles.add("azure-dependency-check-suppress.xml")
-}
-
 dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
@@ -41,17 +37,13 @@ dependencies {
   // Needs to match this version https://github.com/microsoft/ApplicationInsights-Java/blob/<version>/dependencyManagement/build.gradle.kts#L16
   // where <version> is the version of application insights pulled in by hmpps-gradle-spring-boot
   // at https://github.com/ministryofjustice/hmpps-gradle-spring-boot/blob/main/src/main/kotlin/uk/gov/justice/digital/hmpps/gradle/configmanagers/AppInsightsConfigManager.kt#L7
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.26.1")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.28.1")
 
   implementation("org.apache.commons:commons-text:1.15.0")
   implementation("com.google.code.gson:gson:2.14.0")
   implementation("com.google.guava:guava:33.6.0-jre")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
-
-  val appinsightsCore = "core:2.6.4"
-  implementation("io.micrometer:micrometer-registry-azure-monitor:1.17.0")
-  implementation("com.microsoft.azure:applicationinsights-$appinsightsCore")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.5.0")
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -63,10 +55,10 @@ dependencies {
   testImplementation("org.awaitility:awaitility:4.3.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.42") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.45") {
     exclude(group = "io.swagger.core.v3")
   }
-  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.60.1")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.62.0")
 }
 
 kotlin {
