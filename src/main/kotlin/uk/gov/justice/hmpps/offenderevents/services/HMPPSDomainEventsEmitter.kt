@@ -519,24 +519,6 @@ class HMPPSDomainEventsEmitter(
 
   private fun PrisonerMergedOffenderEvent.Companion.toDomainEvents(event: PrisonerMergedOffenderEvent): List<HmppsDomainEvent> = event.toDomainEvents()
 
-  private fun PrisonerMergedOffenderEvent.toDomainEvents(): List<HmppsDomainEvent> = when (this.type) {
-    "MERGE" -> listOf(
-      HmppsDomainEvent(
-        eventType = "prison-offender-events.prisoner.merged",
-        description = "A prisoner has been merged from ${this.offenderIdDisplay} to ${this.previousOffenderIdDisplay}",
-        occurredAt = this.toOccurredAt(),
-        publishedAt = OffsetDateTime.now().toString(),
-        personReference = PersonReference(this.offenderIdDisplay!!),
-      )
-        .withAdditionalInformation("bookingId", this.bookingId)
-        .withAdditionalInformation("nomsNumber", this.offenderIdDisplay)
-        .withAdditionalInformation("removedNomsNumber", this.previousOffenderIdDisplay)
-        .withAdditionalInformation("reason", "MERGE"),
-    )
-
-    else -> emptyList()
-  }
-
   private fun AppointmentChangedEvent.Companion.toDomainEvents(event: AppointmentChangedEvent): List<HmppsDomainEvent> = event.toDomainEvent().toListOrEmptyWhenNull()
 
   private val videoAppointmentTypes = listOf("VLB", "VLPM", "VLLA", "VLOO", "VLPA", "VLAP")
@@ -592,3 +574,21 @@ class HMPPSDomainEventsEmitter(
 }
 private fun HmppsDomainEvent.toList() = listOf(this)
 private fun HmppsDomainEvent?.toListOrEmptyWhenNull() = this?.toList() ?: emptyList()
+
+internal fun PrisonerMergedOffenderEvent.toDomainEvents(): List<HmppsDomainEvent> = when (this.type) {
+  "MERGE" -> listOf(
+    HmppsDomainEvent(
+      eventType = "prison-offender-events.prisoner.merged",
+      description = "A prisoner has been merged from ${this.previousOffenderIdDisplay} to ${this.offenderIdDisplay}",
+      occurredAt = this.toOccurredAt(),
+      publishedAt = OffsetDateTime.now().toString(),
+      personReference = PersonReference(this.offenderIdDisplay!!),
+    )
+      .withAdditionalInformation("bookingId", this.bookingId)
+      .withAdditionalInformation("nomsNumber", this.offenderIdDisplay)
+      .withAdditionalInformation("removedNomsNumber", this.previousOffenderIdDisplay)
+      .withAdditionalInformation("reason", "MERGE"),
+  )
+
+  else -> emptyList()
+}
