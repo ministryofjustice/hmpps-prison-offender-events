@@ -33,6 +33,7 @@ import uk.gov.justice.hmpps.offenderevents.config.OffenderEventsProperties
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPath
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPathDateTimeIsCloseTo
 import uk.gov.justice.hmpps.offenderevents.helpers.assertJsonPathIsArray
+import uk.gov.justice.hmpps.offenderevents.model.PrisonerMergedOffenderEvent
 import uk.gov.justice.hmpps.offenderevents.services.CurrentLocation.IN_PRISON
 import uk.gov.justice.hmpps.offenderevents.services.CurrentLocation.OUTSIDE_PRISON
 import uk.gov.justice.hmpps.offenderevents.services.CurrentPrisonStatus.NOT_UNDER_PRISON_CARE
@@ -47,7 +48,7 @@ import uk.gov.justice.hmpps.sqs.HmppsTopic
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit.SECONDS
-import java.util.Optional
+import java.util.*
 import java.util.concurrent.CompletableFuture
 
 @JsonTest
@@ -2441,6 +2442,30 @@ internal class HMPPSDomainEventsEmitterTest(@Autowired private val jsonMapper: J
       assertThat(telemetryAttributes).containsEntry("occurredAt", "2022-12-04T10:00:00Z")
       assertThat(telemetryAttributes).containsEntry("nomsNumber", "A1234BC")
       assertThat(telemetryAttributes).containsEntry("bookingId", "43124234")
+    }
+  }
+
+  @Nested
+  inner class Merged {
+    @Test
+    fun `should transform merge to domain event`() {
+      val prisonEvent = PrisonerMergedOffenderEvent(
+        eventDatetime = LocalDateTime.of(2022, 12, 4, 10, 0),
+        offenderIdDisplay = "A1234AA",
+        previousOffenderIdDisplay = "B4321BB",
+        type = "MERGE",
+        bookingId = 12345L,
+      )
+
+      with(prisonEvent.toDomainEvents().first()) {
+        assertThat(eventType).isEqualTo("prison-offender-events.prisoner.merged")
+        assertThat(description).isEqualTo("A prisoner has been merged from B4321BB to A1234AA")
+        assertThat(personReference.nomsNumber()).isEqualTo("A1234AA")
+        assertThat(additionalInformation["bookingId"]).isEqualTo("12345")
+        assertThat(additionalInformation["nomsNumber"]).isEqualTo("A1234AA")
+        assertThat(additionalInformation["removedNomsNumber"]).isEqualTo("B4321BB")
+        assertThat(additionalInformation["reason"]).isEqualTo("MERGE")
+      }
     }
   }
 
