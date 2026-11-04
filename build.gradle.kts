@@ -40,6 +40,10 @@ dependencies {
   implementation("com.google.guava:guava:33.7.2-jre")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
+  // Temporarily pin swagger-ui for dompurify issues CVE-2026-11680(2-4)
+  constraints {
+    implementation("org.webjars:swagger-ui:5.34.1")
+  }
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.3")
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
