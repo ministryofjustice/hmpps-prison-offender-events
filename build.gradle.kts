@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.14"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.15"
   kotlin("plugin.spring") version "2.4.21"
 }
 
@@ -25,11 +25,11 @@ configurations["testSmokeImplementation"].extendsFrom(configurations["testImplem
 dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.3")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.1.0")
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.5.0-beta-2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.6.0-beta-2")
   // Needs to match this version https://github.com/microsoft/ApplicationInsights-Java/blob/<version>/dependencyManagement/build.gradle.kts#L16
   // where <version> is the version of application insights pulled in by hmpps-gradle-spring-boot
   // at https://github.com/ministryofjustice/hmpps-gradle-spring-boot/blob/main/src/main/kotlin/uk/gov/justice/digital/hmpps/gradle/configmanagers/AppInsightsConfigManager.kt#L7
@@ -37,7 +37,7 @@ dependencies {
 
   implementation("org.apache.commons:commons-text:1.15.0")
   implementation("com.google.code.gson:gson:2.15.0")
-  implementation("com.google.guava:guava:33.7.2-jre")
+  implementation("com.google.guava:guava:33.8.0-jre")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
   // Temporarily pin swagger-ui for dompurify issues CVE-2026-11680(2-4)
@@ -45,7 +45,7 @@ dependencies {
     implementation("org.webjars:swagger-ui:5.34.1")
   }
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.3")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.1.0")
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   testImplementation("org.springframework.boot:spring-boot-starter-webclient-test")
