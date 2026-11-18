@@ -27,6 +27,7 @@ generic-service:
   serviceAccountName: prison-offender-events
 
   env:
+    JAVA_TOOL_OPTIONS: "-XX:+ExitOnOutOfMemoryError -XX:MaxRAMPercentage=50.0 -XX:-UseBASE64Intrinsics"
     AWS_REGION: "eu-west-2"
     SPRING_PROFILES_ACTIVE: "sns"
 
